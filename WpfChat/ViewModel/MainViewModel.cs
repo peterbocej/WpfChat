@@ -1,11 +1,4 @@
-﻿using System.Windows;
-using System.Windows.Input;
-
-using CommunityToolkit.Mvvm.Input;
-
-using Microsoft.Extensions.Configuration;
-
-using WpfChat.Windows;
+﻿using Microsoft.Extensions.Configuration;
 
 namespace WpfChat.ViewModel;
 

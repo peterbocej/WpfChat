@@ -2,7 +2,6 @@
 using Microsoft.Extensions.DependencyInjection;
 
 using WpfChat.ViewModel;
-using WpfChat.Windows;
 
 namespace WpfChat;
 
@@ -28,11 +27,9 @@ public class Program
         services.AddSingleton<IConfigurationRoot>(config);
 
         services.AddScoped(typeof(MainWindow));
-        services.AddScoped(typeof(LoginWindow));
 
         services.AddScoped<IBaseViewModel, BaseViewModel>();
         services.AddScoped<IMainViewModel, MainViewModel>();
-        services.AddScoped<ILoginViewModel, LoginViewModel>();
 
         App.ServiceProvider = services.BuildServiceProvider();
     }

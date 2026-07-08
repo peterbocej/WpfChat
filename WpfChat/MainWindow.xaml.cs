@@ -1,10 +1,8 @@
 ﻿using System.Windows;
 
-using WpfChat.Windows;
-
 namespace WpfChat;
 
-public interface IMainWindow 
+public interface IMainWindow
 { }
 /// <summary>
 /// Interaction logic for MainWindow.xaml
