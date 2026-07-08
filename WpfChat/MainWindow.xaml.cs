@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using System.Windows.Controls;
 
 using WpfChat.ViewModel;
 
@@ -17,8 +18,8 @@ public partial class MainWindow : Window
         DataContext = _viewModel;
     }
 
-    private void Button_Click(object sender, RoutedEventArgs e)
+    private void btConnect_Click(object sender, RoutedEventArgs e)
     {
-        _viewModel.Login();
+        _viewModel.Connect();
     }
 }

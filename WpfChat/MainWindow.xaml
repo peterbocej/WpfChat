@@ -19,10 +19,15 @@
       <Grid.ColumnDefinitions>
          <ColumnDefinition Width="*"/>
       </Grid.ColumnDefinitions>
-      <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Grid.Row="0" >
+      <ToolBar Grid.Row="0">
          <TextBlock Text="User:" Margin="2" VerticalAlignment="Center"/>
-         <TextBox Text="{Binding UserName, Mode=TwoWay}" Margin="2" VerticalAlignment="Center" Width="80"/>
-         <Button Content="Login" Click="Button_Click" Margin="2" VerticalAlignment="Center" Width="50" Height="20"/>
-      </StackPanel>
+         <TextBox x:Name="tbUser" Text="{Binding UserName, Mode=TwoWay}" VerticalAlignment="Center" Width="80"/>
+         <Separator />
+         <TextBlock Text="Chat with:" Margin="2" VerticalAlignment="Center"/>
+         <TextBox x:Name="tbFriend" Text="{Binding FriendName, Mode=TwoWay}" VerticalAlignment="Center" Width="80"/>
+         <Separator/>
+         <Button x:Name="btConnect" Content="Connect!" Click="btConnect_Click" VerticalAlignment="Center" Width="60"/>
+      </ToolBar>
+      
    </Grid>
 </Window>
