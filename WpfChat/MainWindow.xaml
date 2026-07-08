@@ -6,11 +6,23 @@
         xmlns:local="clr-namespace:WpfChat"
         mc:Ignorable="d"
         xmlns:vm="clr-namespace:WpfChat.ViewModel"
-        Title="{Binding Title}" Height="450" Width="800">
+        Title="{Binding Title, Mode=TwoWay}" Height="450" Width="800">
    <Window.DataContext>
-      <vm:MainViewModel/>
+      <vm:MainWindowVM/>
    </Window.DataContext>
-    <Grid>
-
-    </Grid>
+   <Grid Margin="5">
+      <Grid.RowDefinitions>
+         <RowDefinition Height="30"/>
+         <RowDefinition Height="*"/>
+         <RowDefinition Height="60"/>
+      </Grid.RowDefinitions>
+      <Grid.ColumnDefinitions>
+         <ColumnDefinition Width="*"/>
+      </Grid.ColumnDefinitions>
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Grid.Row="0" >
+         <TextBlock Text="User:" Margin="2" VerticalAlignment="Center"/>
+         <TextBox Text="{Binding UserName, Mode=TwoWay}" Margin="2" VerticalAlignment="Center" Width="80"/>
+         <Button Content="Login" Click="Button_Click" Margin="2" VerticalAlignment="Center" Width="50" Height="20"/>
+      </StackPanel>
+   </Grid>
 </Window>

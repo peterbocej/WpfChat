@@ -13,8 +13,7 @@ public class Program
         ConfigureServices();
         var app = new App();
 
-        var main = App.GetRequiredService<MainWindow>();
-        app.Run(main);
+        app.Run(new MainWindow());
     }
 
     private static void ConfigureServices()
@@ -25,11 +24,6 @@ public class Program
         var services = new ServiceCollection();
 
         services.AddSingleton<IConfigurationRoot>(config);
-
-        services.AddScoped(typeof(MainWindow));
-
-        services.AddScoped<IBaseViewModel, BaseViewModel>();
-        services.AddScoped<IMainViewModel, MainViewModel>();
 
         App.ServiceProvider = services.BuildServiceProvider();
     }
