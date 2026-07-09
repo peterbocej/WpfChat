@@ -8,7 +8,8 @@
         xmlns:vm="clr-namespace:WpfChat.ViewModel"
         Title="{Binding Title, Mode=TwoWay}" 
         Height="450" Width="800"
-        Loaded="Window_Loaded">
+        Loaded="Window_Loaded"
+        Closed="Window_Closed">
    <Window.DataContext>
       <vm:MainWindowVM/>
    </Window.DataContext>
@@ -39,8 +40,7 @@
                 RowBackground="White"
                 IsReadOnly="True"
                 SelectionMode="Extended"
-                Focusable="False"
-                PreviewMouseDown="gdMessages_PreviewMouseDown">
+                Focusable="False">
          <DataGrid.Columns>
             <DataGridTextColumn Binding="{Binding FromAndTime}" Width="Auto">
                <DataGridTextColumn.ElementStyle>

@@ -1,8 +1,5 @@
 ﻿using System.Collections.ObjectModel;
 
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-
 using Microsoft.Extensions.Configuration;
 
 using WpfChat.Model;
@@ -18,8 +15,8 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
     public MainWindowVM()
     {
         _config = App.GetRequiredService<IConfigurationRoot>();
-        UserName = "Ivan";
-        FriendName = "Anna";
+        UserName = Properties.Settings.Default.UserName;
+        FriendName = Properties.Settings.Default.FriendName;
         Messages = new ObservableCollection<Message>(
             [
                 new Message()
@@ -141,8 +138,8 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
 
     public string Title { get; set; } = "Chat";
     private string _username = string.Empty;
-    public string UserName 
-    { 
+    public string UserName
+    {
         get
         {
             return _username;
@@ -152,11 +149,12 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
             _username = value;
             OnPropertyChanged(nameof(UserName));
             SetTitle();
+            Properties.Settings.Default.UserName = _username;
         }
     }
     private string _friendName = string.Empty;
-    public string FriendName 
-    { 
+    public string FriendName
+    {
         get
         {
             return _friendName;
@@ -166,6 +164,7 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
             _friendName = value;
             OnPropertyChanged(nameof(FriendName));
             SetTitle();
+            Properties.Settings.Default.FriendName = _friendName;
         }
     }
     public ICollection<Message> Messages { get; set; }

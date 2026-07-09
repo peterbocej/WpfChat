@@ -9,7 +9,6 @@ namespace WpfChat
     /// </summary>
     public partial class App : Application
     {
-        public static string UserName { get; set; } = default!;
         public static ServiceProvider ServiceProvider { get; set; } = default!;
         public static T GetRequiredService<T>() where T : class
         {
