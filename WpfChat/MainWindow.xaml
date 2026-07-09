@@ -44,8 +44,7 @@
                  Content="Send ->"
                  Click="btSend_Click"
                  Grid.Column="1"
-                 Height="20"
-                 VerticalAlignment="Bottom"/>
+                 VerticalAlignment="Top"/>
       </Grid>
 
       <DataGrid x:Name="gdMessages" Grid.Row="2"

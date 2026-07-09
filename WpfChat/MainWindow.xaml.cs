@@ -28,6 +28,8 @@ public partial class MainWindow : Window
 
     private void btSend_Click(object sender, RoutedEventArgs e)
     {
-        ViewModel.SendMessage();
+        ViewModel.SendMessage()
+            .GetAwaiter()
+            .GetResult();
     }
 }

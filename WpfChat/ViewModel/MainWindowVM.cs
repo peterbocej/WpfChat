@@ -1,9 +1,16 @@
 ﻿using System.Collections.ObjectModel;
+using System.Windows.Threading;
 
 using Microsoft.Extensions.Configuration;
 
+using MySqlX.XDevAPI;
+
 using WpfChat.Model;
 using WpfChat.Repositories;
+
+using WpfChatApp;
+
+using static System.Net.Mime.MediaTypeNames;
 
 namespace WpfChat.ViewModel;
 
@@ -12,12 +19,17 @@ public interface IMainViewModel : IBaseViewModel
 public class MainWindowVM : BaseViewModel, IMainViewModel
 {
     private readonly IMessagesRepository _messagesRepository;
+    private readonly IChatClientService _chatClient;
+    private readonly IConfigurationRoot _configuration;
 
     public MainWindowVM()
     {
         _messagesRepository = App.GetRequiredService<IMessagesRepository>();
+        _chatClient = App.GetRequiredService<IChatClientService>(); 
+        _configuration = App.GetRequiredService<IConfigurationRoot>();
         UserName = Properties.Settings.Default.UserName;
         Refresh();
+        InitChat();
     }
     #region Properties
 
@@ -85,32 +97,40 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
         GetSavedMessages();
     }
     // sends new message
-    internal void SendMessage()
+    internal async Task SendMessage()
     {
         if (string.IsNullOrWhiteSpace(MessageText))
             return;
-
-        var msg = new Message
-        {
-            From = UserName,
-            Body = MessageText!,
-            Me = 1
-        };
-        // add to grid
-        Messages!.Insert(0, msg);
-        SelectedIndex = 0;
-        // add to database
-        _messagesRepository.Add(msg);
-        _messagesRepository.SaveChanges();
+        // send to server
+        await _chatClient.SendPublicMessageAsync(MessageText);
         // clear
         MessageText = string.Empty;
     }
+
+    private void SaveMessage(Message msg)
+    {
+        // add to database
+        _messagesRepository.Add(msg);
+        _messagesRepository.SaveChanges();
+    }
+
     // receive message
+    internal void ReceiveMessage(string from, string text)
+    {
+        var msg = new Message
+        {
+            From = from,
+            Body = text,
+            Me = (byte)(from == UserName ? 1 : 0)
+        };
+        ReceiveMessage(msg);
+    }
     internal void ReceiveMessage(Message message)
     {
         // add to grid
         Messages!.Insert(0, message);
         SelectedIndex = 0;
+        SaveMessage(message);
     }
     private void GetSavedMessages()
     {
@@ -131,5 +151,21 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
         SelectedIndex = 0;
     }
     #endregion
+
+    #region Chat
+
+    private void InitChat()
+    {
+        _chatClient.SystemMessageReceived += (msg) => ReceiveMessage("[SYSTEM]", msg);
+        _chatClient.PublicMessageReceived += (from, msg) => ReceiveMessage(from, msg);
+        _chatClient.ErrorReceived += (msg) => ReceiveMessage("[ERROR]", msg);
+
+        var chatSettings = _configuration.GetSection("Chat");
+        var chatServer = chatSettings.GetValue<string>("Server");
+        Task.Run(async () => await _chatClient.ConnectAsync($"{chatServer}/chat", UserName));
+    }
+
+    #endregion
+
 }
 
