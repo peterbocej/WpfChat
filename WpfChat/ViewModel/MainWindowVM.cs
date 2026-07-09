@@ -16,7 +16,6 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
     {
         _config = App.GetRequiredService<IConfigurationRoot>();
         UserName = Properties.Settings.Default.UserName;
-        FriendName = Properties.Settings.Default.FriendName;
         Task.Run(async () => await GetSavedMessages());
     }
 
@@ -26,16 +25,15 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
         {
             Messages = new ObservableCollection<Message>(
                 [
-                    new Message()
+                new Message()
                 {
                     MessageId = 1,
                     From = UserName,
-                    To = FriendName,
-                    Body = $"Start chat at {DateTime.Now}"
+                    Body = "Start chat"
                 }]);
-            foreach (var msg in Messages.Where(m => m.From == UserName).ToList())
-                msg.Me = 1;
         }
+        foreach (var msg in Messages.Where(m => m.From == UserName).ToList())
+            msg.Me = 1;
     }
 
     public string Title { get; set; } = "Chat";
@@ -54,32 +52,17 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
             Properties.Settings.Default.UserName = _username;
         }
     }
-    private string _friendName = string.Empty;
-    public string FriendName
-    {
-        get
-        {
-            return _friendName;
-        }
-        set
-        {
-            _friendName = value;
-            OnPropertyChanged(nameof(FriendName));
-            SetTitle();
-            Properties.Settings.Default.FriendName = _friendName;
-        }
-    }
     public ICollection<Message>? Messages { get; set; }
 
     private void SetTitle()
     {
-        if (string.IsNullOrWhiteSpace(UserName) || string.IsNullOrWhiteSpace(FriendName))
+        if (string.IsNullOrWhiteSpace(UserName))
             Title = "Chat";
         else
         {
-            Title = $"Chat ({UserName} <=> {FriendName})";
-            OnPropertyChanged(nameof(Title));
+            Title = $"Chat ({UserName})";
         }
+        OnPropertyChanged(nameof(Title));
     }
 
     internal void Connect()

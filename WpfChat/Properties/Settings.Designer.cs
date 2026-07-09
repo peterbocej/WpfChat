@@ -25,25 +25,13 @@ namespace WpfChat.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Ivan")]
+        [global::System.Configuration.DefaultSettingValueAttribute("Admin")]
         public string UserName {
             get {
                 return ((string)(this["UserName"]));
             }
             set {
                 this["UserName"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Anna")]
-        public string FriendName {
-            get {
-                return ((string)(this["FriendName"]));
-            }
-            set {
-                this["FriendName"] = value;
             }
         }
     }

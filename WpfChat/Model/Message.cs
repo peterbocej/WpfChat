@@ -10,8 +10,6 @@ public class Message
     [Required]
     public string From { get; set; } = default!;
     [Required]
-    public string To { get; set; } = default!;
-    [Required]
     public string Body { get; set; } = default!;
     public DateTime Time { get; set; } = DateTime.Now;
     [IgnoreDataMember]

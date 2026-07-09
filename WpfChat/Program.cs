@@ -33,7 +33,7 @@ public class Program
                 rollingInterval: RollingInterval.Day,
                 retainedFileCountLimit: 7)
             .CreateLogger();
-        
+
         services.AddSingleton<IConfigurationRoot>(config);
 
         services.AddDbContext<AppDbContext>(options =>
@@ -50,7 +50,7 @@ public class Program
             options.UseLoggerFactory(loggerFactory);
         }, ServiceLifetime.Singleton);
 
-        services.AddTransient<IMessagesRepos, MessagesRepos>();
+        services.AddTransient<IMessagesRepository, MessagesRepository>();
 
         App.ServiceProvider = services.BuildServiceProvider();
     }

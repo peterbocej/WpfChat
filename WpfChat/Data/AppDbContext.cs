@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 using Serilog;
 
@@ -28,22 +24,13 @@ namespace WpfChat.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            Message[] messages = [
+            modelBuilder.Entity<Message>().HasData(
                 new Message()
                 {
                     MessageId = 1,
                     From = Properties.Settings.Default.UserName,
-                    To = Properties.Settings.Default.FriendName,
-                    Body = "Majstrovstvá sveta vo futbale 2026 prebiehajú v USA, Kanade a Mexiku a sú historicky najväčším turnajom – prvýkrát sa ho zúčastňuje 48 tímov, ktoré odohrajú 104 zápasov. Šampionát začal 11. júna a finále je naplánované na 19. júla."
-                },
-                new Message()
-                {
-                    MessageId = 2,
-                    From = Properties.Settings.Default.FriendName,
-                    To = Properties.Settings.Default.UserName,
-                    Body = "Do play-off postupujú prví dvaja z každej skupiny + 8 najlepších tretích tímov, spolu 32 mužstiev."
-                }];
-            modelBuilder.Entity<Message>().HasData(messages);
+                    Body = "Start messaging."
+                });
         }
     }
 }
