@@ -9,17 +9,16 @@ namespace WpfChat;
 /// </summary>
 public partial class MainWindow : Window
 {
-    private readonly MainWindowVM _viewModel;
     public MainWindow()
     {
         InitializeComponent();
-        _viewModel = new MainWindowVM();
-        DataContext = _viewModel;
     }
+
+    private MainWindowVM ViewModel => (MainWindowVM)DataContext;
 
     private void btConnect_Click(object sender, RoutedEventArgs e)
     {
-        _viewModel.Connect();
+        ViewModel.Connect();
     }
 
     private void Window_Loaded(object sender, RoutedEventArgs e)

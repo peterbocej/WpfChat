@@ -17,123 +17,25 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
         _config = App.GetRequiredService<IConfigurationRoot>();
         UserName = Properties.Settings.Default.UserName;
         FriendName = Properties.Settings.Default.FriendName;
-        Messages = new ObservableCollection<Message>(
-            [
-                new Message()
+        Task.Run(async () => await GetSavedMessages());
+    }
+
+    private async Task GetSavedMessages()
+    {
+        if (Messages == null)
+        {
+            Messages = new ObservableCollection<Message>(
+                [
+                    new Message()
                 {
                     MessageId = 1,
                     From = UserName,
                     To = FriendName,
-                    Body = "Majstrovstvá sveta vo futbale 2026 prebiehajú v USA, Kanade a Mexiku a sú historicky najväčším turnajom – prvýkrát sa ho zúčastňuje 48 tímov, ktoré odohrajú 104 zápasov. Šampionát začal 11. júna a finále je naplánované na 19. júla."
-                },
-                new Message()
-                {
-                    MessageId = 2,
-                    From = FriendName,
-                    To = UserName,
-                    Body = "Do play-off postupujú prví dvaja z každej skupiny + 8 najlepších tretích tímov, spolu 32 mužstiev."
-                },
-                new Message()
-                {
-                    MessageId = 3,
-                    From = UserName,
-                    To = FriendName,
-                    Body = "Majstrovstvá sveta vo futbale 2026 prebiehajú v USA, Kanade a Mexiku a sú historicky najväčším turnajom – prvýkrát sa ho zúčastňuje 48 tímov, ktoré odohrajú 104 zápasov. Šampionát začal 11. júna a finále je naplánované na 19. júla."
-                },
-                new Message()
-                {
-                    MessageId = 4,
-                    From = FriendName,
-                    To = UserName,
-                    Body = "Do play-off postupujú prví dvaja z každej skupiny + 8 najlepších tretích tímov, spolu 32 mužstiev."
-                },
-                new Message()
-                {
-                    MessageId = 5,
-                    From = UserName,
-                    To = FriendName,
-                    Body = "Majstrovstvá sveta vo futbale 2026 prebiehajú v USA, Kanade a Mexiku a sú historicky najväčším turnajom – prvýkrát sa ho zúčastňuje 48 tímov, ktoré odohrajú 104 zápasov. Šampionát začal 11. júna a finále je naplánované na 19. júla."
-                },
-                new Message()
-                {
-                    MessageId = 6,
-                    From = FriendName,
-                    To = UserName,
-                    Body = "Do play-off postupujú prví dvaja z každej skupiny + 8 najlepších tretích tímov, spolu 32 mužstiev."
-                },
-                new Message()
-                {
-                    MessageId = 7,
-                    From = UserName,
-                    To = FriendName,
-                    Body = "Majstrovstvá sveta vo futbale 2026 prebiehajú v USA, Kanade a Mexiku a sú historicky najväčším turnajom – prvýkrát sa ho zúčastňuje 48 tímov, ktoré odohrajú 104 zápasov. Šampionát začal 11. júna a finále je naplánované na 19. júla."
-                },
-                new Message()
-                {
-                    MessageId = 8,
-                    From = FriendName,
-                    To = UserName,
-                    Body = "Do play-off postupujú prví dvaja z každej skupiny + 8 najlepších tretích tímov, spolu 32 mužstiev."
-                },
-                new Message()
-                {
-                    MessageId = 1,
-                    From = UserName,
-                    To = FriendName,
-                    Body = "Majstrovstvá sveta vo futbale 2026 prebiehajú v USA, Kanade a Mexiku a sú historicky najväčším turnajom – prvýkrát sa ho zúčastňuje 48 tímov, ktoré odohrajú 104 zápasov. Šampionát začal 11. júna a finále je naplánované na 19. júla."
-                },
-                new Message()
-                {
-                    MessageId = 2,
-                    From = FriendName,
-                    To = UserName,
-                    Body = "Do play-off postupujú prví dvaja z každej skupiny + 8 najlepších tretích tímov, spolu 32 mužstiev."
-                },
-                new Message()
-                {
-                    MessageId = 1,
-                    From = UserName,
-                    To = FriendName,
-                    Body = "Majstrovstvá sveta vo futbale 2026 prebiehajú v USA, Kanade a Mexiku a sú historicky najväčším turnajom – prvýkrát sa ho zúčastňuje 48 tímov, ktoré odohrajú 104 zápasov. Šampionát začal 11. júna a finále je naplánované na 19. júla."
-                },
-                new Message()
-                {
-                    MessageId = 2,
-                    From = FriendName,
-                    To = UserName,
-                    Body = "Do play-off postupujú prví dvaja z každej skupiny + 8 najlepších tretích tímov, spolu 32 mužstiev."
-                },
-                new Message()
-                {
-                    MessageId = 1,
-                    From = UserName,
-                    To = FriendName,
-                    Body = "Majstrovstvá sveta vo futbale 2026 prebiehajú v USA, Kanade a Mexiku a sú historicky najväčším turnajom – prvýkrát sa ho zúčastňuje 48 tímov, ktoré odohrajú 104 zápasov. Šampionát začal 11. júna a finále je naplánované na 19. júla."
-                },
-                new Message()
-                {
-                    MessageId = 2,
-                    From = FriendName,
-                    To = UserName,
-                    Body = "Do play-off postupujú prví dvaja z každej skupiny + 8 najlepších tretích tímov, spolu 32 mužstiev."
-                },
-                new Message()
-                {
-                    MessageId = 1,
-                    From = UserName,
-                    To = FriendName,
-                    Body = "Majstrovstvá sveta vo futbale 2026 prebiehajú v USA, Kanade a Mexiku a sú historicky najväčším turnajom – prvýkrát sa ho zúčastňuje 48 tímov, ktoré odohrajú 104 zápasov. Šampionát začal 11. júna a finále je naplánované na 19. júla."
-                },
-                new Message()
-                {
-                    MessageId = 2,
-                    From = FriendName,
-                    To = UserName,
-                    Body = "Do play-off postupujú prví dvaja z každej skupiny + 8 najlepších tretích tímov, spolu 32 mužstiev."
-                },
-            ]);
-        foreach (var msg in Messages.Where(m => m.From == UserName).ToList())
-            msg.Me = 1;
+                    Body = $"Start chat at {DateTime.Now}"
+                }]);
+            foreach (var msg in Messages.Where(m => m.From == UserName).ToList())
+                msg.Me = 1;
+        }
     }
 
     public string Title { get; set; } = "Chat";
@@ -167,7 +69,7 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
             Properties.Settings.Default.FriendName = _friendName;
         }
     }
-    public ICollection<Message> Messages { get; set; }
+    public ICollection<Message>? Messages { get; set; }
 
     private void SetTitle()
     {
