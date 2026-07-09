@@ -22,4 +22,14 @@ public partial class MainWindow : Window
     {
         _viewModel.Connect();
     }
+
+    private void gdMessages_PreviewMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        e.Handled = true;
+    }
+
+    private void Window_Loaded(object sender, RoutedEventArgs e)
+    {
+        gdMessages.ScrollIntoView(gdMessages.Items.Cast<object>().Last());
+    }
 }

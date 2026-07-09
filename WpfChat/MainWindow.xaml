@@ -6,7 +6,9 @@
         xmlns:local="clr-namespace:WpfChat"
         mc:Ignorable="d"
         xmlns:vm="clr-namespace:WpfChat.ViewModel"
-        Title="{Binding Title, Mode=TwoWay}" Height="450" Width="800">
+        Title="{Binding Title, Mode=TwoWay}" 
+        Height="450" Width="800"
+        Loaded="Window_Loaded">
    <Window.DataContext>
       <vm:MainWindowVM/>
    </Window.DataContext>
@@ -28,6 +30,46 @@
          <Separator/>
          <Button x:Name="btConnect" Content="Connect!" Click="btConnect_Click" VerticalAlignment="Center" Width="60"/>
       </ToolBar>
-      
+      <DataGrid x:Name="gdMessages" Grid.Row="1"
+                ItemsSource="{Binding Messages}"
+                AutoGenerateColumns="False"
+                HeadersVisibility="None"
+                BorderThickness="0"
+                GridLinesVisibility="None"
+                RowBackground="White"
+                IsReadOnly="True"
+                SelectionMode="Extended"
+                Focusable="False"
+                PreviewMouseDown="gdMessages_PreviewMouseDown">
+         <DataGrid.Columns>
+            <DataGridTextColumn Binding="{Binding FromAndTime}" Width="Auto">
+               <DataGridTextColumn.ElementStyle>
+                  <Style TargetType="TextBlock">
+                     <Setter Property="TextWrapping" Value="Wrap"/>
+                     <Style.Triggers>
+                        <DataTrigger Binding="{Binding Me}" Value="1">
+                           <Setter Property="Background" Value="#FFFCFFCB"/>
+                           <Setter Property="Foreground" Value="Black"/>
+                        </DataTrigger>
+                     </Style.Triggers>
+                  </Style>
+               </DataGridTextColumn.ElementStyle>
+            </DataGridTextColumn>
+            <DataGridTextColumn Binding="{Binding Body}" Width="*">
+               <DataGridTextColumn.ElementStyle>
+                  <Style TargetType="TextBlock">
+                     <Setter Property="TextWrapping" Value="Wrap"/>
+                     <Style.Triggers>
+                        <DataTrigger Binding="{Binding Me}" Value="1">
+                           <Setter Property="Background" Value="#FFFCFFCB"/>
+                           <Setter Property="Foreground" Value="Black"/>
+                        </DataTrigger>
+                     </Style.Triggers>
+                  </Style>
+               </DataGridTextColumn.ElementStyle>
+            </DataGridTextColumn>
+         </DataGrid.Columns>
+      </DataGrid>
+
    </Grid>
 </Window>
