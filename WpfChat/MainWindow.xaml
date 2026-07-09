@@ -8,7 +8,6 @@
         xmlns:vm="clr-namespace:WpfChat.ViewModel"
         Title="{Binding Title}" 
         Height="450" Width="800"
-        Loaded="Window_Loaded"
         Closed="Window_Closed">
    <Window.DataContext>
       <vm:MainWindowVM/>
@@ -16,18 +15,40 @@
    <Grid Margin="5">
       <Grid.RowDefinitions>
          <RowDefinition Height="30"/>
-         <RowDefinition Height="*"/>
          <RowDefinition Height="60"/>
+         <RowDefinition Height="*"/>
       </Grid.RowDefinitions>
       <Grid.ColumnDefinitions>
          <ColumnDefinition Width="*"/>
       </Grid.ColumnDefinitions>
+
       <ToolBar Grid.Row="0">
          <TextBlock Text="User:" Margin="2" VerticalAlignment="Center"/>
          <TextBox x:Name="tbUser" Text="{Binding UserName, Mode=TwoWay}" VerticalAlignment="Center" Width="80"/>
          <Button x:Name="btRefresh" Content="Refresh" Click="btRefresh_Click" VerticalAlignment="Center" Width="60"/>
       </ToolBar>
-      <DataGrid x:Name="gdMessages" Grid.Row="1"
+
+      <Grid Grid.Row="1">
+         <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto"/>
+         </Grid.ColumnDefinitions>
+         <TextBox x:Name="tbMessage"
+                  AcceptsReturn="True"
+                  TextWrapping="Wrap"
+                  VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
+                  VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                  Text="{Binding MessageText, Mode=TwoWay}"
+                  Grid.Column="0"/>
+         <Button x:Name="btSend"
+                 Content="Send ->"
+                 Click="btSend_Click"
+                 Grid.Column="1"
+                 Height="20"
+                 VerticalAlignment="Bottom"/>
+      </Grid>
+
+      <DataGrid x:Name="gdMessages" Grid.Row="2"
                 ItemsSource="{Binding Messages}"
                 AutoGenerateColumns="False"
                 HeadersVisibility="None"
@@ -35,9 +56,9 @@
                 GridLinesVisibility="None"
                 RowBackground="White"
                 IsReadOnly="True"
-                SelectionMode="Extended"
+                SelectionMode="Single"
                 Focusable="False"
-                SelectedItem="{Binding SelectedMessage, Mode=TwoWay}">
+                SelectedIndex="{Binding SelectedIndex, Mode=TwoWay}">
          <DataGrid.Columns>
             <DataGridTextColumn Binding="{Binding FromAndTime}" Width="Auto">
                <DataGridTextColumn.ElementStyle>
@@ -67,23 +88,5 @@
             </DataGridTextColumn>
          </DataGrid.Columns>
       </DataGrid>
-      <Grid Grid.Row="2">
-         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="Auto"/>
-         </Grid.ColumnDefinitions>
-         <TextBox x:Name="tbMessage"
-                  AcceptsReturn="True"
-                  AcceptsTab="True"
-                  TextWrapping="Wrap"
-                  VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
-                  VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
-                  Text="{Binding MessageText, Mode=TwoWay}"
-                  Grid.Column="0"/>
-         <Button x:Name="btSend"
-                 Content="Send ->"
-                 Click="btSend_Click"
-                 Grid.Column="1"/>
-      </Grid>
    </Grid>
 </Window>

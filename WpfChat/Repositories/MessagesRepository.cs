@@ -1,6 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-
-using WpfChat.Data;
+﻿using WpfChat.Data;
 using WpfChat.Model;
 
 namespace WpfChat.Repositories
@@ -26,8 +24,8 @@ namespace WpfChat.Repositories
 
         public ICollection<Message> GetConversation()
         {
-            return  _context.Messages
-                .OrderBy(m => m.Time)
+            return _context.Messages
+                .OrderByDescending(m => m.Time)
                 .Select(m => m)
                 .ToList();
         }

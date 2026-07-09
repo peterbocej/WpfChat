@@ -11,15 +11,13 @@ public interface IMainViewModel : IBaseViewModel
 { }
 public class MainWindowVM : BaseViewModel, IMainViewModel
 {
-    private readonly IConfigurationRoot _config;
     private readonly IMessagesRepository _messagesRepository;
 
     public MainWindowVM()
     {
-        _config = App.GetRequiredService<IConfigurationRoot>();
         _messagesRepository = App.GetRequiredService<IMessagesRepository>();
         UserName = Properties.Settings.Default.UserName;
-        GetSavedMessages();
+        Refresh();
     }
     #region Properties
 
@@ -48,16 +46,14 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
             Properties.Settings.Default.UserName = _username;
         }
     }
-    public ICollection<Message>? Messages { get; set; }
-    private Message? _selectedMessage;
-
-    public Message? SelectedMessage
+    public ObservableCollection<Message> Messages { get; set; } = new ObservableCollection<Message>();
+    private int _selectedIndex;
+    public int SelectedIndex
     {
-        get => _selectedMessage;
+        get => _selectedIndex;
         set
         {
-            _selectedMessage = value;
-            OnPropertyChanged(nameof(SelectedMessage));
+            _selectedIndex = value;
         }
     }
     private string? _messageText;
@@ -71,10 +67,10 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
             OnPropertyChanged(nameof(MessageText));
         }
     }
-    #endregion
-    
-    #region Functions
 
+    #endregion
+
+    #region Functions
     private void SetTitle()
     {
         if (string.IsNullOrWhiteSpace(UserName))
@@ -88,38 +84,51 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
         SetTitle();
         GetSavedMessages();
     }
-
+    // sends new message
     internal void SendMessage()
     {
+        if (string.IsNullOrWhiteSpace(MessageText))
+            return;
+
         var msg = new Message
         {
             From = UserName,
             Body = MessageText!,
             Me = 1
         };
+        // add to grid
+        Messages!.Insert(0, msg);
+        SelectedIndex = 0;
         // add to database
         _messagesRepository.Add(msg);
         _messagesRepository.SaveChanges();
-        // add to grid
-        Messages!.Add(msg);
-        SelectedMessage = msg;
         // clear
         MessageText = string.Empty;
-
+    }
+    // receive message
+    internal void ReceiveMessage(Message message)
+    {
+        // add to grid
+        Messages!.Insert(0, message);
+        SelectedIndex = 0;
     }
     private void GetSavedMessages()
     {
+        // clear messages
         if (Messages == null)
-        {
             Messages = new ObservableCollection<Message>();
-            foreach (var msg in _messagesRepository.GetConversation())
-            {
-                if (msg.From == UserName)
-                    msg.Me = 1;
-                Messages.Add(msg);
-            }
-            SelectedMessage = Messages.Last();
+        else
+            Messages.Clear();
+        // load messages to collection
+        foreach (var msg in _messagesRepository.GetConversation())
+        {
+            if (msg.From == UserName)
+                msg.Me = 1; // sets message color in grid
+            else 
+                msg.Me = 0;
+            Messages.Add(msg);
         }
+        SelectedIndex = 0;
     }
     #endregion
 }
