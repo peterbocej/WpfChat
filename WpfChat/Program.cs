@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Serilog;
 
 using WpfChat.Data;
+using WpfChat.Repositories;
 
 namespace WpfChat;
 
@@ -48,6 +49,8 @@ public class Program
             });
             options.UseLoggerFactory(loggerFactory);
         }, ServiceLifetime.Singleton);
+
+        services.AddTransient<IMessagesRepos, MessagesRepos>();
 
         App.ServiceProvider = services.BuildServiceProvider();
     }
