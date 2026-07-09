@@ -25,7 +25,7 @@
       <ToolBar Grid.Row="0">
          <TextBlock Text="User:" Margin="2" VerticalAlignment="Center"/>
          <TextBox x:Name="tbUser" Text="{Binding UserName, Mode=TwoWay}" VerticalAlignment="Center" Width="80"/>
-         <Button x:Name="btConnect" Content="Connect!" Click="btConnect_Click" VerticalAlignment="Center" Width="60"/>
+         <Button x:Name="btRefresh" Content="Refresh" Click="btRefresh_Click" VerticalAlignment="Center" Width="60"/>
       </ToolBar>
       <DataGrid x:Name="gdMessages" Grid.Row="1"
                 ItemsSource="{Binding Messages}"
@@ -36,7 +36,8 @@
                 RowBackground="White"
                 IsReadOnly="True"
                 SelectionMode="Extended"
-                Focusable="False">
+                Focusable="False"
+                SelectedItem="{Binding SelectedMessage, Mode=TwoWay}">
          <DataGrid.Columns>
             <DataGridTextColumn Binding="{Binding FromAndTime}" Width="Auto">
                <DataGridTextColumn.ElementStyle>

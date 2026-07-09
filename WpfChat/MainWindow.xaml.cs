@@ -16,11 +16,6 @@ public partial class MainWindow : Window
 
     private MainWindowVM ViewModel => (MainWindowVM)DataContext;
 
-    private void btConnect_Click(object sender, RoutedEventArgs e)
-    {
-        ViewModel.Connect();
-    }
-
     private void Window_Loaded(object sender, RoutedEventArgs e)
     {
         gdMessages.ScrollIntoView(gdMessages.Items.Cast<object>().Last());
@@ -29,5 +24,10 @@ public partial class MainWindow : Window
     private void Window_Closed(object sender, EventArgs e)
     {
         Properties.Settings.Default.Save();
+    }
+
+    private void btRefresh_Click(object sender, RoutedEventArgs e)
+    {
+        ViewModel.Refresh();
     }
 }

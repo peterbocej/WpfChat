@@ -3,6 +3,7 @@
 using Microsoft.Extensions.Configuration;
 
 using WpfChat.Model;
+using WpfChat.Repositories;
 
 namespace WpfChat.ViewModel;
 
@@ -11,10 +12,12 @@ public interface IMainViewModel : IBaseViewModel
 public class MainWindowVM : BaseViewModel, IMainViewModel
 {
     private readonly IConfigurationRoot _config;
+    private readonly IMessagesRepository _messagesRepository;
 
     public MainWindowVM()
     {
         _config = App.GetRequiredService<IConfigurationRoot>();
+        _messagesRepository = App.GetRequiredService<IMessagesRepository>();
         UserName = Properties.Settings.Default.UserName;
         Task.Run(async () => await GetSavedMessages());
     }
@@ -23,17 +26,15 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
     {
         if (Messages == null)
         {
-            Messages = new ObservableCollection<Message>(
-                [
-                new Message()
-                {
-                    MessageId = 1,
-                    From = UserName,
-                    Body = "Start chat"
-                }]);
+            Messages = new ObservableCollection<Message>();
+            foreach (var msg in await _messagesRepository.GetConversationAsync())
+            {
+                if (msg.From == UserName)
+                    msg.Me = 1;
+                Messages.Add(msg);
+            }
+            SelectedMessage = Messages.Last();
         }
-        foreach (var msg in Messages.Where(m => m.From == UserName).ToList())
-            msg.Me = 1;
     }
 
     public string Title { get; set; } = "Chat";
@@ -53,6 +54,7 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
         }
     }
     public ICollection<Message>? Messages { get; set; }
+    public Message? SelectedMessage { get; set; }
 
     private void SetTitle()
     {
@@ -65,7 +67,7 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
         OnPropertyChanged(nameof(Title));
     }
 
-    internal void Connect()
+    internal void Refresh()
     {
         SetTitle();
     }
