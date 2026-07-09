@@ -30,4 +30,9 @@ public partial class MainWindow : Window
     {
         ViewModel.Refresh();
     }
+
+    private void btSend_Click(object sender, RoutedEventArgs e)
+    {
+        ViewModel.SendMessage();
+    }
 }

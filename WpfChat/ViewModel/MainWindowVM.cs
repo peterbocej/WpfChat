@@ -19,25 +19,20 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
         _config = App.GetRequiredService<IConfigurationRoot>();
         _messagesRepository = App.GetRequiredService<IMessagesRepository>();
         UserName = Properties.Settings.Default.UserName;
-        Task.Run(async () => await GetSavedMessages());
+        GetSavedMessages();
     }
+    #region Properties
 
-    private async Task GetSavedMessages()
+    private string _title = "Chat";
+    public string Title
     {
-        if (Messages == null)
+        get => _title;
+        set
         {
-            Messages = new ObservableCollection<Message>();
-            foreach (var msg in await _messagesRepository.GetConversationAsync())
-            {
-                if (msg.From == UserName)
-                    msg.Me = 1;
-                Messages.Add(msg);
-            }
-            SelectedMessage = Messages.Last();
+            _title = value;
+            OnPropertyChanged(nameof(Title));
         }
     }
-
-    public string Title { get; set; } = "Chat";
     private string _username = string.Empty;
     public string UserName
     {
@@ -54,21 +49,78 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
         }
     }
     public ICollection<Message>? Messages { get; set; }
-    public Message? SelectedMessage { get; set; }
+    private Message? _selectedMessage;
+
+    public Message? SelectedMessage
+    {
+        get => _selectedMessage;
+        set
+        {
+            _selectedMessage = value;
+            OnPropertyChanged(nameof(SelectedMessage));
+        }
+    }
+    private string? _messageText;
+
+    public string? MessageText
+    {
+        get => _messageText;
+        set
+        {
+            _messageText = value;
+            OnPropertyChanged(nameof(MessageText));
+        }
+    }
+    #endregion
+    
+    #region Functions
 
     private void SetTitle()
     {
         if (string.IsNullOrWhiteSpace(UserName))
             Title = "Chat";
         else
-        {
             Title = $"Chat ({UserName})";
-        }
-        OnPropertyChanged(nameof(Title));
     }
 
     internal void Refresh()
     {
         SetTitle();
+        GetSavedMessages();
     }
+
+    internal void SendMessage()
+    {
+        var msg = new Message
+        {
+            From = UserName,
+            Body = MessageText!,
+            Me = 1
+        };
+        // add to database
+        _messagesRepository.Add(msg);
+        _messagesRepository.SaveChanges();
+        // add to grid
+        Messages!.Add(msg);
+        SelectedMessage = msg;
+        // clear
+        MessageText = string.Empty;
+
+    }
+    private void GetSavedMessages()
+    {
+        if (Messages == null)
+        {
+            Messages = new ObservableCollection<Message>();
+            foreach (var msg in _messagesRepository.GetConversation())
+            {
+                if (msg.From == UserName)
+                    msg.Me = 1;
+                Messages.Add(msg);
+            }
+            SelectedMessage = Messages.Last();
+        }
+    }
+    #endregion
 }
+

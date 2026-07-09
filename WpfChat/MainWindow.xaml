@@ -67,6 +67,23 @@
             </DataGridTextColumn>
          </DataGrid.Columns>
       </DataGrid>
-
+      <Grid Grid.Row="2">
+         <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto"/>
+         </Grid.ColumnDefinitions>
+         <TextBox x:Name="tbMessage"
+                  AcceptsReturn="True"
+                  AcceptsTab="True"
+                  TextWrapping="Wrap"
+                  VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
+                  VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                  Text="{Binding MessageText, Mode=TwoWay}"
+                  Grid.Column="0"/>
+         <Button x:Name="btSend"
+                 Content="Send ->"
+                 Click="btSend_Click"
+                 Grid.Column="1"/>
+      </Grid>
    </Grid>
 </Window>

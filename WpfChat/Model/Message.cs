@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Runtime.Serialization;
 
 namespace WpfChat.Model;
@@ -6,6 +7,7 @@ namespace WpfChat.Model;
 public class Message
 {
     [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int MessageId { get; set; }
     [Required]
     public string From { get; set; } = default!;

@@ -8,7 +8,8 @@ namespace WpfChat.Repositories
     public interface IMessagesRepository
     {
         ICollection<Message> GetConversation();
-        Task<ICollection<Message>> GetConversationAsync();
+        void Add(Message message);
+        int SaveChanges();
     }
     public class MessagesRepository : IMessagesRepository
     {
@@ -18,16 +19,22 @@ namespace WpfChat.Repositories
             _context = context;
         }
 
+        public void Add(Message message)
+        {
+            _context.Messages.Add(message);
+        }
+
         public ICollection<Message> GetConversation()
         {
-            return GetConversationAsync().Result;
-        }
-        public async Task<ICollection<Message>> GetConversationAsync()
-        {
-            return await _context.Messages
+            return  _context.Messages
                 .OrderBy(m => m.Time)
                 .Select(m => m)
-                .ToListAsync();
+                .ToList();
+        }
+
+        public int SaveChanges()
+        {
+            return _context.SaveChanges();
         }
     }
 }
