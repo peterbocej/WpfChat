@@ -15,7 +15,6 @@ namespace WpfChatApp
         bool IsConnected { get; }
 
         event Action<string>? ErrorReceived;
-        event Action<string, string>? PrivateMessageReceived;
         event Action<string, string>? PublicMessageReceived;
         event Action<string>? SystemMessageReceived;
 
@@ -37,7 +36,6 @@ namespace WpfChatApp
         // Events for UI binding
         public event Action<string>? SystemMessageReceived;
         public event Action<string, string>? PublicMessageReceived;
-        public event Action<string, string>? PrivateMessageReceived;
         public event Action<string>? ErrorReceived;
 
         public ChatClientService(IConfigurationRoot configuration)
@@ -107,20 +105,6 @@ namespace WpfChatApp
                         RaiseOnUI(() => PublicMessageReceived?.Invoke(
                             doc.RootElement.GetProperty("from").GetString() ?? "",
                             doc.RootElement.GetProperty("message").GetString() ?? ""));
-                        break;
-                    case "private":
-                        if (doc.RootElement.TryGetProperty("from", out var from))
-                        {
-                            RaiseOnUI(() => PrivateMessageReceived?.Invoke(
-                                from.GetString() ?? "",
-                                doc.RootElement.GetProperty("message").GetString() ?? ""));
-                        }
-                        else
-                        {
-                            RaiseOnUI(() => PrivateMessageReceived?.Invoke(
-                                $"(to {doc.RootElement.GetProperty("to").GetString()})",
-                                doc.RootElement.GetProperty("message").GetString() ?? ""));
-                        }
                         break;
                     case "error":
                         RaiseOnUI(() => ErrorReceived?.Invoke(doc.RootElement.GetProperty("message").GetString() ?? ""));

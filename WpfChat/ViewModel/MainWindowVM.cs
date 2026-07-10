@@ -1,9 +1,13 @@
 ﻿using System.Collections.ObjectModel;
+using System.Windows;
+using System.Windows.Input;
 using System.Windows.Threading;
 
 using Microsoft.Extensions.Configuration;
 
 using MySqlX.XDevAPI;
+
+using Serilog;
 
 using WpfChat.Model;
 using WpfChat.Repositories;
@@ -19,17 +23,15 @@ public interface IMainViewModel : IBaseViewModel
 public class MainWindowVM : BaseViewModel, IMainViewModel
 {
     private readonly IMessagesRepository _messagesRepository;
-    private readonly IChatClientService _chatClient;
+    private IChatClientService _chatClient = null!;
     private readonly IConfigurationRoot _configuration;
 
     public MainWindowVM()
     {
         _messagesRepository = App.GetRequiredService<IMessagesRepository>();
-        _chatClient = App.GetRequiredService<IChatClientService>(); 
         _configuration = App.GetRequiredService<IConfigurationRoot>();
         UserName = Properties.Settings.Default.UserName;
-        Refresh();
-        InitChat();
+        Connect();
     }
     #region Properties
 
@@ -79,6 +81,27 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
             OnPropertyChanged(nameof(MessageText));
         }
     }
+    private bool _chatEnabled = false;
+    public bool ChatEnabled
+    {
+        get => _chatEnabled;
+        set
+        {
+            _chatEnabled = value;
+            OnPropertyChanged(nameof(ChatEnabled));
+        }
+    }
+    public bool ChatDisabled { get => !ChatEnabled; }
+    private Cursor _cursor = Cursors.Arrow;
+    public Cursor Cursor
+    {
+        get => _cursor;
+        set
+        {
+            _cursor = value;
+            OnPropertyChanged(nameof(Cursor));
+        }
+    }
 
     #endregion
 
@@ -91,22 +114,6 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
             Title = $"Chat ({UserName})";
     }
 
-    internal void Refresh()
-    {
-        SetTitle();
-        GetSavedMessages();
-    }
-    // sends new message
-    internal async Task SendMessage()
-    {
-        if (string.IsNullOrWhiteSpace(MessageText))
-            return;
-        // send to server
-        await _chatClient.SendPublicMessageAsync(MessageText);
-        // clear
-        MessageText = string.Empty;
-    }
-
     private void SaveMessage(Message msg)
     {
         // add to database
@@ -114,24 +121,6 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
         _messagesRepository.SaveChanges();
     }
 
-    // receive message
-    internal void ReceiveMessage(string from, string text)
-    {
-        var msg = new Message
-        {
-            From = from,
-            Body = text,
-            Me = (byte)(from == UserName ? 1 : 0)
-        };
-        ReceiveMessage(msg);
-    }
-    internal void ReceiveMessage(Message message)
-    {
-        // add to grid
-        Messages!.Insert(0, message);
-        SelectedIndex = 0;
-        SaveMessage(message);
-    }
     private void GetSavedMessages()
     {
         // clear messages
@@ -150,19 +139,100 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
         }
         SelectedIndex = 0;
     }
+
     #endregion
 
     #region Chat
-
-    private void InitChat()
+    internal void Connect()
     {
-        _chatClient.SystemMessageReceived += (msg) => ReceiveMessage("[SYSTEM]", msg);
-        _chatClient.PublicMessageReceived += (from, msg) => ReceiveMessage(from, msg);
-        _chatClient.ErrorReceived += (msg) => ReceiveMessage("[ERROR]", msg);
+        try
+        {
+            Cursor = Cursors.Wait;
+            SetTitle();
+            GetSavedMessages();
 
-        var chatSettings = _configuration.GetSection("Chat");
-        var chatServer = chatSettings.GetValue<string>("Server");
-        Task.Run(async () => await _chatClient.ConnectAsync($"{chatServer}/chat", UserName));
+            _chatClient = App.GetRequiredService<IChatClientService>();
+            _chatClient.PublicMessageReceived += (from, msg) => ReceiveMessage(from, msg);
+            _chatClient.SystemMessageReceived += (msg) => ReceiveMessage("[SYSTEM]", msg);
+            _chatClient.ErrorReceived += (msg) => ReceiveMessage("[ERROR]", msg);
+
+            var chatSettings = _configuration.GetSection("Chat");
+            var chatServer = chatSettings.GetValue<string>("Server");
+            _chatClient.ConnectAsync($"{chatServer}/chat", UserName)
+                .GetAwaiter()
+                .GetResult();
+
+            ChatEnabled = true;
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(Window, ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            Log.Error(ex.Message);
+        }
+        finally
+        {
+            Cursor = Cursors.Arrow;
+        }
+    }
+    internal async Task Disconnect()
+    {
+        try
+        {
+            Cursor = Cursors.Wait;
+            await _chatClient.DisconnectAsync();
+            _chatClient.Dispose();
+            ChatEnabled = false;
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(Window, ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            Log.Error(ex.Message);
+        }
+        finally
+        {
+            Cursor = Cursors.Arrow;
+        }
+    }
+    // sends new message
+    internal async Task SendMessage()
+    {
+        if (string.IsNullOrWhiteSpace(MessageText))
+            return;
+        // send to server
+        await _chatClient.SendPublicMessageAsync(MessageText);
+        // clear
+        MessageText = string.Empty;
+    }
+    // receive message
+    internal void ReceiveMessage(string from, string text)
+    {
+        var msg = new Message
+        {
+            From = from,
+            Body = text,
+            Me = (byte)(from == UserName ? 1 : 0)
+        };
+        ReceiveMessage(msg);
+    }
+    internal void ReceiveMessage(Message message)
+    {
+        try
+        {
+            Cursor = Cursors.Wait;
+            // add to grid
+            Messages!.Insert(0, message);
+            SelectedIndex = 0;
+            SaveMessage(message);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(Window, ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            Log.Error(ex.Message);
+        }
+        finally
+        {
+            Cursor = Cursors.Arrow;
+        }
     }
 
     #endregion

@@ -19,16 +19,26 @@ public partial class MainWindow : Window
     private void Window_Closed(object sender, EventArgs e)
     {
         Properties.Settings.Default.Save();
-    }
-
-    private void btRefresh_Click(object sender, RoutedEventArgs e)
-    {
-        ViewModel.Refresh();
+        ViewModel.Disconnect()
+            .GetAwaiter()
+            .GetResult();
     }
 
     private void btSend_Click(object sender, RoutedEventArgs e)
     {
         ViewModel.SendMessage()
+            .GetAwaiter()
+            .GetResult();
+    }
+
+    private void btConnect_Click(object sender, RoutedEventArgs e)
+    {
+        ViewModel.Connect();
+    }
+
+    private void btDisconnect_Click(object sender, RoutedEventArgs e)
+    {
+        ViewModel.Disconnect()
             .GetAwaiter()
             .GetResult();
     }
