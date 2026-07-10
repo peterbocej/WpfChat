@@ -1,6 +1,7 @@
 ﻿using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text;
+using System.Text.Json;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -10,7 +11,7 @@ using WpfChat.Domain.Settings;
 
 namespace WpfChat.Services;
 
-public interface IApiService
+public interface IApiService : IDisposable
 {
     Task<Message?> GetMessageByIdAsync(int id);
     Task<IList<Message>> GetMessagesAsync();
@@ -22,7 +23,6 @@ public interface IApiService
 
 public class ApiService : IApiService
 {
-    private readonly HttpClient _httpClient;
     private readonly IConfiguration _configuration;
     private readonly ChatSettings _chatSettings;
     private readonly ILogger<ApiService> _logger;
@@ -33,52 +33,91 @@ public class ApiService : IApiService
         _logger = logger;
         _chatSettings = new ChatSettings();
         _configuration.GetSection("Chat").Bind(_chatSettings);
-        _httpClient = new HttpClient();
-        _httpClient.BaseAddress = new Uri($"{_chatSettings.Server}:{_chatSettings.Port}");
-        _httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
-        _httpClient.DefaultRequestHeaders.Add("User-Agent", "WPFChat");
-        _httpClient.Timeout = TimeSpan.FromSeconds(5);
     }
 
-    // GET request example
+    private HttpClient GetHttpClient()
+    {
+        var httpClient = new HttpClient();
+        httpClient.BaseAddress = new Uri($"{_chatSettings.Server}:{_chatSettings.Port}");
+        httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
+        httpClient.DefaultRequestHeaders.Add("User-Agent", "WPFChat");
+        httpClient.Timeout = TimeSpan.FromSeconds(5);
+        return httpClient;
+    }
+    // GET messages
     public async Task<IList<Message>> GetMessagesAsync()
     {
-        var response = await _httpClient.GetAsync($"{_chatSettings.Path}/list");
-        response.EnsureSuccessStatusCode();
+        using (var client = GetHttpClient())
+        {
+            var response = await client.GetAsync($"{_chatSettings.Path}/list");
+            response.EnsureSuccessStatusCode();
 
-        var messages = await response.Content.ReadFromJsonAsync<List<Message>>();
-        return messages ?? new List<Message>();
+            var messages = await response.Content.ReadFromJsonAsync<List<Message>>();
+            return messages ?? new List<Message>();
+        }
     }
 
-    // GET with parameters
+    // GET message by id
     public async Task<Message?> GetMessageByIdAsync(int id)
     {
-        var response = await _httpClient.GetAsync($"{id}");
-        response.EnsureSuccessStatusCode();
+        using (var client = GetHttpClient())
+        {
+            var response = await client.GetAsync($"{id}");
+            response.EnsureSuccessStatusCode();
 
-        return await response.Content.ReadFromJsonAsync<Message>();
+            return await response.Content.ReadFromJsonAsync<Message>();
+        }
     }
 
     public async Task ConnectAsync(string username)
     {
-        var content = new StringContent($"\"{username}\"", Encoding.UTF8, "application/json");
-        var response = await _httpClient.PostAsync($"{_chatSettings.Path}/connect", content);
-        if (!response.IsSuccessStatusCode)
-            throw new ApplicationException("Error connecting to chat.");
+        using (var client = GetHttpClient())
+        {
+            var json = JsonSerializer.Serialize(username);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            var url = $"{_chatSettings.Path}/connect";
+            using var response = await client.PostAsync(url, content);
+            if (!response.IsSuccessStatusCode)
+                throw new ApplicationException("Error connecting to chat.");
+        }
     }
 
-    public Task DisconnectAsync(string username)
+    public async Task DisconnectAsync(string username)
     {
-        throw new NotImplementedException();
+        using (var client = GetHttpClient())
+        {
+            var json = JsonSerializer.Serialize(username);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            var response = await client.PostAsync($"{_chatSettings.Path}/disconnect", content);
+            if (!response.IsSuccessStatusCode)
+                throw new ApplicationException("Error connecting to chat.");
+        }
     }
 
-    public Task SendMessageAsync(Message message)
+    public async Task SendMessageAsync(Message message)
     {
-        throw new NotImplementedException();
+        using (var client = GetHttpClient())
+        {
+            var json = JsonSerializer.Serialize(message);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            var response = await client.PostAsync($"{_chatSettings.Path}/connect", content);
+            if (!response.IsSuccessStatusCode)
+                throw new ApplicationException("Error connecting to chat.");
+        }
     }
 
-    public Task<IList<Message>> CheckNewMessagesAsync(int lastId)
+    public async Task<IList<Message>> CheckNewMessagesAsync(int lastId)
     {
-        throw new NotImplementedException();
+        using (var client = GetHttpClient())
+        {
+            var response = await client.GetAsync($"{_chatSettings.Path}/check/{lastId}");
+            response.EnsureSuccessStatusCode();
+
+            var messages = await response.Content.ReadFromJsonAsync<List<Message>>();
+            return messages ?? new List<Message>();
+        }
     }
+
+    public void Dispose()
+    { }
 }

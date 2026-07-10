@@ -19,7 +19,6 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
     {
         _apiService = App.GetRequiredService<IApiService>();
         UserName = Properties.Settings.Default.UserName;
-        GetSavedMessages().GetAwaiter().GetResult();
     }
     #region Properties
 
@@ -132,6 +131,12 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
         {
             MessageBox.Show(Window, ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
+    }
+
+    public override void Dispose()
+    {
+        base.Dispose();
+        _apiService.Dispose();
     }
 
     #endregion
