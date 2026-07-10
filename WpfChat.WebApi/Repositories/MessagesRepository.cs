@@ -9,7 +9,7 @@ namespace WpfChat.WebApi.Repositories
     {
         Task<ICollection<Message>> GetMessagesAsync();
         Task<Message?> GetMessageAsync(int id);
-        Task<int> AddAsync(Message message);
+        Task<Message?> AddAsync(Message message);
         Task<int> SaveChangesAsync();
         Task<ICollection<Message>> GetLastMessagesAsync(int lastId);
     }
@@ -21,13 +21,13 @@ namespace WpfChat.WebApi.Repositories
             _context = context;
         }
 
-        public async Task<int> AddAsync(Message message)
+        public async Task<Message?> AddAsync(Message message)
         {
             var retMsg = await _context.Messages.AddAsync(message);
             if (retMsg == null || retMsg.State != EntityState.Added)
                 throw new ApplicationException("Error adding message.");
 
-            return retMsg.Entity.MessageId;
+            return retMsg.Entity;
         }
 
         public async Task<ICollection<Message>> GetLastMessagesAsync(int lastId)

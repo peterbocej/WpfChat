@@ -17,4 +17,8 @@ public class Message
     [IgnoreDataMember]
     public byte Me { get; set; } = 0;
     public string FromAndTime => $"{From}\n{Time.ToString("H:m:s")}";
+    public override string ToString()
+    {
+        return FromAndTime;
+    }
 }

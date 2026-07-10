@@ -11,9 +11,11 @@ namespace WpfChat.WebApi.Controllers;
 public class ChatController : ControllerBase
 {
     private readonly IMessagesRepository _messagesRepository;
-    public ChatController(IMessagesRepository messagesRepository)
+    private readonly ILogger<ChatController> _logger;
+    public ChatController(IMessagesRepository messagesRepository, ILogger<ChatController> logger, IHttpClientFactory httpClientFactory)
     {
         _messagesRepository = messagesRepository;
+        _logger = logger;
     }
 
     [HttpPost("connect")]
@@ -21,18 +23,24 @@ public class ChatController : ControllerBase
     {
         try
         {
+            _logger.LogInformation($"Connect: {username}");
+            
+            if (string.IsNullOrEmpty(username))
+                return this.BadRequest("Invalid user name.");
+
             var message = new Message
             {
                 From = "[SYSTEM]",
                 Body = $"{username} connected."
             };
-            var id = await _messagesRepository.AddAsync(message);
+            var msgRet = await _messagesRepository.AddAsync(message)
+                ?? throw new ApplicationException("Error adding message.");
             await _messagesRepository.SaveChangesAsync();
-            message.MessageId = id;
-            return CreatedAtAction(nameof(GetMessage), new { id }, message);
+            return Ok();
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex.Message);
             return BadRequest(ex.Message);
         }
     }
@@ -42,18 +50,20 @@ public class ChatController : ControllerBase
     {
         try
         {
+            _logger.LogInformation($"Disonnect: {username}");
             var message = new Message
             {
                 From = "[SYSTEM]",
                 Body = $"{username} disconnected."
             };
-            var id = await _messagesRepository.AddAsync(message);
+            var msgRet = await _messagesRepository.AddAsync(message)
+                ?? throw new ApplicationException("Error adding message.");
             await _messagesRepository.SaveChangesAsync();
-            message.MessageId = id;
-            return CreatedAtAction(nameof(GetMessage), new { id }, message);
+            return Ok();
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex.Message);
             return BadRequest(ex.Message);
         }
     }
@@ -63,10 +73,12 @@ public class ChatController : ControllerBase
     {
         try
         {
+            _logger.LogInformation(nameof(GetSavedMessages));
             return Ok(await _messagesRepository.GetMessagesAsync());
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex.Message);
             return BadRequest(ex.Message);
         }
     }
@@ -75,6 +87,7 @@ public class ChatController : ControllerBase
     {
         try
         {
+            _logger.LogInformation($"GetMessage: {id}");
             var msg = Ok(await _messagesRepository.GetMessageAsync(id));
             if (msg == null)
                 return NotFound(id);
@@ -82,6 +95,7 @@ public class ChatController : ControllerBase
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex.Message);
             return BadRequest(ex.Message);
         }
     }
@@ -90,13 +104,15 @@ public class ChatController : ControllerBase
     {
         try
         {
-            var id = await _messagesRepository.AddAsync(message);
+            _logger.LogInformation($"Send: {message}");
+            var msgRet = await _messagesRepository.AddAsync(message)
+                ?? throw new ApplicationException("Error adding message.");
             await _messagesRepository.SaveChangesAsync();
-            message.MessageId = id;
-            return CreatedAtAction(nameof(GetMessage), new { id }, message);
+            return Created();
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex.Message);
             return BadRequest(ex.Message);
         }
     }
@@ -105,10 +121,12 @@ public class ChatController : ControllerBase
     {
         try
         {
+            _logger.LogInformation($"Get lat: {lastId}");
             return Ok(await _messagesRepository.GetLastMessagesAsync(lastId));
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex.Message);
             return BadRequest(ex.Message);
         }
     }

@@ -19,6 +19,7 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
     {
         _apiService = App.GetRequiredService<IApiService>();
         UserName = Properties.Settings.Default.UserName;
+        GetSavedMessages().GetAwaiter().GetResult();
     }
     #region Properties
 
@@ -109,21 +110,28 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
 
     private async Task GetSavedMessages()
     {
-        // clear messages
-        if (Messages == null)
-            Messages = new ObservableCollection<Message>();
-        else
-            Messages.Clear();
-        // load messages to collection
-        foreach (var msg in await _apiService.GetMessagesAsync())
+        try
         {
-            if (msg.From == UserName)
-                msg.Me = 1; // sets message color in grid
-            else 
-                msg.Me = 0;
-            Messages.Add(msg);
+            // clear messages
+            if (Messages == null)
+                Messages = new ObservableCollection<Message>();
+            else
+                Messages.Clear();
+            // load messages to collection
+            foreach (var msg in await _apiService.GetMessagesAsync())
+            {
+                if (msg.From == UserName)
+                    msg.Me = 1; // sets message color in grid
+                else
+                    msg.Me = 0;
+                Messages.Add(msg);
+            }
+            SelectedIndex = 0;
         }
-        SelectedIndex = 0;
+        catch (Exception ex)
+        {
+            MessageBox.Show(Window, ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
 
     #endregion
@@ -134,8 +142,8 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
         try
         {
             Cursor = Cursors.Wait;
-            await GetSavedMessages();
-
+            await _apiService.ConnectAsync(UserName);
+            //await GetSavedMessages();
             ChatEnabled = true;
             SetTitle();
         }
@@ -154,6 +162,7 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
         try
         {
             Cursor = Cursors.Wait;
+            //await _apiService.Disconnect(UserName);
             ChatEnabled = false;
         }
         catch (Exception ex)
@@ -171,23 +180,31 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
     {
         if (string.IsNullOrWhiteSpace(MessageText))
             return;
+        var message = new Message
+        {
+            From = UserName,
+            Body = MessageText
+        };
         // send to server
-
+        //await _apiService.SendMessageAsync(message);
         // clear
         MessageText = string.Empty;
     }
     // receive message
-    internal void ReceiveMessage(string from, string text)
+    internal async Task ReceiveMessages()
     {
-        var msg = new Message
+        try
         {
-            From = from,
-            Body = text,
-            Me = (byte)(from == UserName ? 1 : 0)
-        };
-        ReceiveMessage(msg);
+            //var messages = await _apiService.CheckMessagesAsync(Messages.Last().MessageId);
+            //foreach (var message in messages)
+            //    ReceiveMessage(message);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(Window, ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
-    internal void ReceiveMessage(Message message)
+    private void ReceiveMessage(Message message)
     {
         try
         {
