@@ -28,12 +28,16 @@
          <Separator/>
          <Button x:Name="btConnect" 
                  Content="Connect" Click="btConnect_Click" 
-                 VerticalAlignment="Center" Width="60"
+                 VerticalAlignment="Center" Width="80"
                  IsEnabled="{Binding ChatDisabled}"/>
          <Button x:Name="btDisconnect" 
                  Content="Disconnect" Click="btDisconnect_Click" 
                  VerticalAlignment="Center" Width="80"
                  IsEnabled="{Binding ChatEnabled}"/>
+         <Separator/>
+         <Button x:Name="btRefresh"
+                 Content="Refresh" Click="btRefresh_Click"
+                 VerticalAlignment="Center" Width="80"/>
       </ToolBar>
 
       <Grid Grid.Row="1">

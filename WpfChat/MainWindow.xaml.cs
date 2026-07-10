@@ -16,32 +16,29 @@ public partial class MainWindow : Window
 
     private MainWindowVM ViewModel => (MainWindowVM)DataContext;
 
-    private void Window_Closed(object sender, EventArgs e)
+    private async void Window_Closed(object sender, EventArgs e)
     {
         Properties.Settings.Default.Save();
-        ViewModel.Disconnect()
-            .GetAwaiter()
-            .GetResult();
+        await ViewModel.Disconnect();
     }
 
-    private void btSend_Click(object sender, RoutedEventArgs e)
+    private async void btSend_Click(object sender, RoutedEventArgs e)
     {
-        ViewModel.SendMessage()
-            .GetAwaiter()
-            .GetResult();
+        await ViewModel.SendMessage();
     }
 
-    private void btConnect_Click(object sender, RoutedEventArgs e)
+    private async void btConnect_Click(object sender, RoutedEventArgs e)
     {
-        ViewModel.Connect()
-            .GetAwaiter()
-            .GetResult();
+        await ViewModel.Connect();
     }
 
-    private void btDisconnect_Click(object sender, RoutedEventArgs e)
+    private async void btDisconnect_Click(object sender, RoutedEventArgs e)
     {
-        ViewModel.Disconnect()
-            .GetAwaiter()
-            .GetResult();
+        await ViewModel.Disconnect();
+    }
+
+    private async void btRefresh_Click(object sender, RoutedEventArgs e)
+    {
+        await ViewModel.Refresh();
     }
 }

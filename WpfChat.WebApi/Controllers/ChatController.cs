@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 
 using WpfChat.Domain.Model;
 using WpfChat.WebApi.Repositories;
@@ -19,12 +18,12 @@ public class ChatController : ControllerBase
     }
 
     [HttpPost("connect")]
-    public async Task<IActionResult> Connect([FromBody]string username)
+    public async Task<IActionResult> Connect([FromBody] string username)
     {
         try
         {
             _logger.LogInformation($"Connect: {username}");
-            
+
             if (string.IsNullOrEmpty(username))
                 return this.BadRequest("Invalid user name.");
 
@@ -36,7 +35,7 @@ public class ChatController : ControllerBase
             var msgRet = await _messagesRepository.AddAsync(message)
                 ?? throw new ApplicationException("Error adding message.");
             await _messagesRepository.SaveChangesAsync();
-            return Ok();
+            return Ok(msgRet);
         }
         catch (Exception ex)
         {
@@ -46,7 +45,7 @@ public class ChatController : ControllerBase
     }
 
     [HttpPost("disconnect")]
-    public async Task<IActionResult> Disconnect([FromBody]string username)
+    public async Task<IActionResult> Disconnect([FromBody] string username)
     {
         try
         {
@@ -59,7 +58,7 @@ public class ChatController : ControllerBase
             var msgRet = await _messagesRepository.AddAsync(message)
                 ?? throw new ApplicationException("Error adding message.");
             await _messagesRepository.SaveChangesAsync();
-            return Ok();
+            return Ok(msgRet);
         }
         catch (Exception ex)
         {

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace WpfChat.Domain.Settings;
+﻿namespace WpfChat.Domain.Settings;
 
 public class ChatSettings
 {

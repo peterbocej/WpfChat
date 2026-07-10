@@ -1,7 +1,7 @@
-﻿using WpfChat.WebApi.Data;
-using WpfChat.Domain.Model;
+﻿using Microsoft.EntityFrameworkCore;
 
-using Microsoft.EntityFrameworkCore;
+using WpfChat.Domain.Model;
+using WpfChat.WebApi.Data;
 
 namespace WpfChat.WebApi.Repositories
 {

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -16,10 +12,7 @@ public class Program
     public static void Main(string[] args)
     {
         var services = new ServiceCollection();
-        services.AddLogging(conf =>
-        {
-            conf.AddConsole();
-        });
+        services.AddLogging(conf => conf.AddDebug());
         var configuration = new ConfigurationBuilder()
             .AddJsonFile("appsettings.json")
             .Build();

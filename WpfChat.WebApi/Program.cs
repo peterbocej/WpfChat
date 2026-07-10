@@ -8,8 +8,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddSwaggerGen();
-
 builder.Services.AddControllers();
 builder.Services.AddHttpClient();
 
@@ -23,10 +21,12 @@ builder.Services.AddScoped<IMessagesRepository, MessagesRepository>();
 var chatSettings = new ChatSettings();
 builder.Configuration.GetSection("Chat").Bind(chatSettings);
 
-var app = builder.Build();
+builder.WebHost.ConfigureKestrel(o =>
+{
+    o.ListenAnyIP(7077);
+});
 
-app.UseSwagger();
-app.UseSwaggerUI();
+var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 

@@ -19,6 +19,7 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
     {
         _apiService = App.GetRequiredService<IApiService>();
         UserName = Properties.Settings.Default.UserName;
+
     }
     #region Properties
 
@@ -102,11 +103,6 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
             Title = $"Chat ({UserName}) - {connected}";
     }
 
-    private void SaveMessage(Message msg)
-    {
-        // add to database
-    }
-
     private async Task GetSavedMessages()
     {
         try
@@ -148,7 +144,7 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
         {
             Cursor = Cursors.Wait;
             await _apiService.ConnectAsync(UserName);
-            //await GetSavedMessages();
+            await GetSavedMessages();
             ChatEnabled = true;
             SetTitle();
         }
@@ -167,7 +163,8 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
         try
         {
             Cursor = Cursors.Wait;
-            //await _apiService.Disconnect(UserName);
+            await _apiService.DisconnectAsync(UserName);
+            await ReceiveMessages();
             ChatEnabled = false;
         }
         catch (Exception ex)
@@ -191,7 +188,8 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
             Body = MessageText
         };
         // send to server
-        //await _apiService.SendMessageAsync(message);
+        await _apiService.SendMessageAsync(message);
+        await ReceiveMessages();
         // clear
         MessageText = string.Empty;
     }
@@ -200,9 +198,10 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
     {
         try
         {
-            //var messages = await _apiService.CheckMessagesAsync(Messages.Last().MessageId);
-            //foreach (var message in messages)
-            //    ReceiveMessage(message);
+            Cursor = Cursors.Wait;
+            var messages = await _apiService.CheckNewMessagesAsync(Messages.Last().MessageId);
+            foreach (var message in messages)
+                ReceiveMessage(message);
         }
         catch (Exception ex)
         {
@@ -213,11 +212,27 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
     {
         try
         {
-            Cursor = Cursors.Wait;
             // add to grid
             Messages!.Insert(0, message);
             SelectedIndex = 0;
-            SaveMessage(message);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(Window, ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            Log.Error(ex.Message);
+        }
+        finally
+        {
+            Cursor = Cursors.Arrow;
+        }
+    }
+
+    internal async Task Refresh()
+    {
+        try
+        {
+            Cursor = Cursors.Wait;
+            await GetSavedMessages();
         }
         catch (Exception ex)
         {

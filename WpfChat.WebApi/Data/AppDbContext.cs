@@ -1,7 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-using Serilog;
-
 using WpfChat.Domain.Model;
 
 namespace WpfChat.WebApi.Data
@@ -10,14 +8,7 @@ namespace WpfChat.WebApi.Data
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
-            try
-            {
-                Database.EnsureCreated();
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex.Message, ex);
-            }
+            Database.EnsureCreated();
         }
 
         public DbSet<Message> Messages { get; set; }
