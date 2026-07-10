@@ -1,13 +1,17 @@
 ﻿using WpfChat.WebApi.Data;
-using WpfChat.WebApi.Model;
+using WpfChat.Domain.Model;
 
-namespace WpfChat.Repositories
+using Microsoft.EntityFrameworkCore;
+
+namespace WpfChat.WebApi.Repositories
 {
     public interface IMessagesRepository
     {
-        ICollection<Message> GetConversation();
-        void Add(Message message);
-        int SaveChanges();
+        Task<ICollection<Message>> GetMessagesAsync();
+        Task<Message?> GetMessageAsync(int id);
+        Task<int> AddAsync(Message message);
+        Task<int> SaveChangesAsync();
+        Task<ICollection<Message>> GetLastMessagesAsync(int lastId);
     }
     public class MessagesRepository : IMessagesRepository
     {
@@ -17,22 +21,46 @@ namespace WpfChat.Repositories
             _context = context;
         }
 
-        public void Add(Message message)
+        public async Task<int> AddAsync(Message message)
         {
-            _context.Messages.Add(message);
+            var retMsg = await _context.Messages.AddAsync(message);
+            if (retMsg == null || retMsg.State != EntityState.Added)
+                throw new ApplicationException("Error adding message.");
+
+            return retMsg.Entity.MessageId;
         }
 
-        public ICollection<Message> GetConversation()
+        public async Task<ICollection<Message>> GetLastMessagesAsync(int lastId)
         {
-            return _context.Messages
+            return await _context.Messages
+                .Where(m => m.MessageId > lastId)
                 .OrderByDescending(m => m.Time)
                 .Select(m => m)
-                .ToList();
+                .ToListAsync();
         }
 
-        public int SaveChanges()
+        public async Task<Message?> GetMessageAsync(int id)
         {
-            return _context.SaveChanges();
+            return await _context.Messages.FindAsync(id);
+        }
+
+        public async Task<ICollection<Message>> GetMessagesAsync()
+        {
+            return await _context.Messages
+                .OrderByDescending(m => m.Time)
+                .Select(m => m)
+                .ToListAsync();
+        }
+
+
+
+        public async Task<int> SaveChangesAsync()
+        {
+            var ret = await _context.SaveChangesAsync();
+            if (ret == 0)
+                throw new ApplicationException("Error saving message to db.");
+
+            return ret;
         }
     }
 }

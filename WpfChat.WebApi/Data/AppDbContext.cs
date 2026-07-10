@@ -2,7 +2,7 @@
 
 using Serilog;
 
-using WpfChat.WebApi.Model;
+using WpfChat.Domain.Model;
 
 namespace WpfChat.WebApi.Data
 {

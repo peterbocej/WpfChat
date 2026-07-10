@@ -1,8 +1,23 @@
+using Microsoft.EntityFrameworkCore;
+
+using WpfChat.Domain.Settings;
+using WpfChat.WebApi.Data;
+using WpfChat.WebApi.Repositories;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllers();
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+{
+    options.UseMySql(ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("MySql-chat")));
+}, ServiceLifetime.Scoped);
+builder.Services.AddScoped<IMessagesRepository, MessagesRepository>();
+
+var chatSettings = new ChatSettings();
+builder.Configuration.GetSection("Chat").Bind(chatSettings);
 
 var app = builder.Build();
 

@@ -115,7 +115,7 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
         else
             Messages.Clear();
         // load messages to collection
-        foreach (var msg in await _apiService.GetSavedMessagesAsync())
+        foreach (var msg in await _apiService.GetMessagesAsync())
         {
             if (msg.From == UserName)
                 msg.Me = 1; // sets message color in grid
