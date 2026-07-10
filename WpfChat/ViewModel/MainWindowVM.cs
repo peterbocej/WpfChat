@@ -31,7 +31,7 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
         _messagesRepository = App.GetRequiredService<IMessagesRepository>();
         _configuration = App.GetRequiredService<IConfigurationRoot>();
         UserName = Properties.Settings.Default.UserName;
-        Connect();
+        Connect().GetAwaiter().GetResult();
     }
     #region Properties
 
@@ -108,10 +108,11 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
     #region Functions
     private void SetTitle()
     {
+        var connected = ChatEnabled ? "Online" : "Offline";
         if (string.IsNullOrWhiteSpace(UserName))
-            Title = "Chat";
+            Title = $"Chat - {connected}";
         else
-            Title = $"Chat ({UserName})";
+            Title = $"Chat ({UserName}) - {connected}";
     }
 
     private void SaveMessage(Message msg)
@@ -143,12 +144,11 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
     #endregion
 
     #region Chat
-    internal void Connect()
+    internal async Task Connect()
     {
         try
         {
             Cursor = Cursors.Wait;
-            SetTitle();
             GetSavedMessages();
 
             _chatClient = App.GetRequiredService<IChatClientService>();
@@ -156,13 +156,12 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
             _chatClient.SystemMessageReceived += (msg) => ReceiveMessage("[SYSTEM]", msg);
             _chatClient.ErrorReceived += (msg) => ReceiveMessage("[ERROR]", msg);
 
-            var chatSettings = _configuration.GetSection("Chat");
-            var chatServer = chatSettings.GetValue<string>("Server");
-            _chatClient.ConnectAsync($"{chatServer}/chat", UserName)
-                .GetAwaiter()
-                .GetResult();
+            var chatSettings = new ChatSettings();
+            _configuration.GetSection("Chat").Bind(chatSettings);
+            await _chatClient.ConnectAsync($"{chatSettings.Server}:{chatSettings.Port}{chatSettings.Path}", UserName);
 
             ChatEnabled = true;
+            SetTitle();
         }
         catch (Exception ex)
         {
@@ -237,5 +236,11 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
 
     #endregion
 
+    private class ChatSettings
+    {
+        public string Server { get; set; } = string.Empty;
+        public int Port { get; set; }
+        public string Path { get; set; } = string.Empty;
+    }
 }
 

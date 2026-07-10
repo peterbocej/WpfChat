@@ -33,7 +33,9 @@ public partial class MainWindow : Window
 
     private void btConnect_Click(object sender, RoutedEventArgs e)
     {
-        ViewModel.Connect();
+        ViewModel.Connect()
+            .GetAwaiter()
+            .GetResult();
     }
 
     private void btDisconnect_Click(object sender, RoutedEventArgs e)
