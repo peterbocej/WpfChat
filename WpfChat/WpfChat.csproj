@@ -28,8 +28,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Services\" />
     <Folder Include="Windows\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\WpfChat.Domain\WpfChat.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>

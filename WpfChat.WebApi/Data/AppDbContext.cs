@@ -2,9 +2,9 @@
 
 using Serilog;
 
-using WpfChat.Model;
+using WpfChat.WebApi.Model;
 
-namespace WpfChat.Data
+namespace WpfChat.WebApi.Data
 {
     public class AppDbContext : DbContext
     {
@@ -28,8 +28,8 @@ namespace WpfChat.Data
                 new Message()
                 {
                     MessageId = 1,
-                    From = Properties.Settings.Default.UserName,
-                    Body = "Start messaging."
+                    From = "Admin",
+                    Body = "Initialize."
                 });
         }
     }

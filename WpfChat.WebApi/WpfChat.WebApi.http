@@ -1,0 +1,6 @@
+@WpfChat.WebApi_HostAddress = http://localhost:5089
+
+GET {{WpfChat.WebApi_HostAddress}}/
+Accept: application/json
+
+###

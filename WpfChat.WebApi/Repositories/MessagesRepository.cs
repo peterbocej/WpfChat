@@ -1,5 +1,5 @@
-﻿using WpfChat.Data;
-using WpfChat.Model;
+﻿using WpfChat.WebApi.Data;
+using WpfChat.WebApi.Model;
 
 namespace WpfChat.Repositories
 {

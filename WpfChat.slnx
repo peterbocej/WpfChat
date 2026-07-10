@@ -6,5 +6,7 @@
     <File Path="README.md" />
     <File Path="Zadanie.docx" />
   </Folder>
+  <Project Path="WpfChat.Domain/WpfChat.Domain.csproj" Id="eba78127-5d64-4bdd-b56b-4097f2e78da0" />
+  <Project Path="WpfChat.WebApi/WpfChat.WebApi.csproj" Id="aefac61e-11b6-40dc-9414-068dd4ca3b97" />
   <Project Path="WpfChat/WpfChat.csproj" />
 </Solution>

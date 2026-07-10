@@ -1,20 +1,11 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Threading;
-
-using Microsoft.Extensions.Configuration;
-
-using MySqlX.XDevAPI;
 
 using Serilog;
 
-using WpfChat.Model;
-using WpfChat.Repositories;
-
-using WpfChatApp;
-
-using static System.Net.Mime.MediaTypeNames;
+using WpfChat.Domain.Model;
+using WpfChat.Services;
 
 namespace WpfChat.ViewModel;
 
@@ -22,16 +13,12 @@ public interface IMainViewModel : IBaseViewModel
 { }
 public class MainWindowVM : BaseViewModel, IMainViewModel
 {
-    private readonly IMessagesRepository _messagesRepository;
-    private IChatClientService _chatClient = null!;
-    private readonly IConfigurationRoot _configuration;
+    private readonly IApiService _apiService;
 
     public MainWindowVM()
     {
-        _messagesRepository = App.GetRequiredService<IMessagesRepository>();
-        _configuration = App.GetRequiredService<IConfigurationRoot>();
+        _apiService = App.GetRequiredService<IApiService>();
         UserName = Properties.Settings.Default.UserName;
-        Connect().GetAwaiter().GetResult();
     }
     #region Properties
 
@@ -118,11 +105,9 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
     private void SaveMessage(Message msg)
     {
         // add to database
-        _messagesRepository.Add(msg);
-        _messagesRepository.SaveChanges();
     }
 
-    private void GetSavedMessages()
+    private async Task GetSavedMessages()
     {
         // clear messages
         if (Messages == null)
@@ -130,7 +115,7 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
         else
             Messages.Clear();
         // load messages to collection
-        foreach (var msg in _messagesRepository.GetConversation())
+        foreach (var msg in await _apiService.GetSavedMessagesAsync())
         {
             if (msg.From == UserName)
                 msg.Me = 1; // sets message color in grid
@@ -149,16 +134,7 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
         try
         {
             Cursor = Cursors.Wait;
-            GetSavedMessages();
-
-            _chatClient = App.GetRequiredService<IChatClientService>();
-            _chatClient.PublicMessageReceived += (from, msg) => ReceiveMessage(from, msg);
-            _chatClient.SystemMessageReceived += (msg) => ReceiveMessage("[SYSTEM]", msg);
-            _chatClient.ErrorReceived += (msg) => ReceiveMessage("[ERROR]", msg);
-
-            var chatSettings = new ChatSettings();
-            _configuration.GetSection("Chat").Bind(chatSettings);
-            await _chatClient.ConnectAsync($"{chatSettings.Server}:{chatSettings.Port}{chatSettings.Path}", UserName);
+            await GetSavedMessages();
 
             ChatEnabled = true;
             SetTitle();
@@ -178,8 +154,6 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
         try
         {
             Cursor = Cursors.Wait;
-            await _chatClient.DisconnectAsync();
-            _chatClient.Dispose();
             ChatEnabled = false;
         }
         catch (Exception ex)
@@ -198,7 +172,7 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
         if (string.IsNullOrWhiteSpace(MessageText))
             return;
         // send to server
-        await _chatClient.SendPublicMessageAsync(MessageText);
+
         // clear
         MessageText = string.Empty;
     }
@@ -236,11 +210,5 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
 
     #endregion
 
-    private class ChatSettings
-    {
-        public string Server { get; set; } = string.Empty;
-        public int Port { get; set; }
-        public string Path { get; set; } = string.Empty;
-    }
 }
 

@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Runtime.Serialization;
 
-namespace WpfChat.Model;
+namespace WpfChat.Domain.Model;
 
 public class Message
 {
