@@ -2,13 +2,21 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfChat"
         mc:Ignorable="d"
         xmlns:vm="clr-namespace:WpfChat.ViewModel"
         Title="{Binding Title}" 
-        Height="450" Width="800"
-        Closed="Window_Closed">
+        Height="450" Width="800">
+   <i:Interaction.Triggers>
+      <i:EventTrigger EventName="Closed">
+         <i:InvokeCommandAction Command="{Binding ClosedCommand}"/>
+      </i:EventTrigger>
+      <i:EventTrigger EventName="Loaded">
+         <i:InvokeCommandAction Command="{Binding LoadedCommand}"/>
+      </i:EventTrigger>
+   </i:Interaction.Triggers>
    <Window.DataContext>
       <vm:MainWindowVM/>
    </Window.DataContext>
@@ -30,16 +38,15 @@
                   IsEnabled="{Binding ChatDisabled}"/>
          <Separator/>
          <Button x:Name="btConnect" 
-                 Content="Connect" Click="btConnect_Click" 
+                 Content="Connect" Command="{Binding ConnectCommand}"
                  VerticalAlignment="Center" Width="80"
                  IsEnabled="{Binding ChatDisabled}"/>
          <Button x:Name="btDisconnect" 
-                 Content="Disconnect" Click="btDisconnect_Click" 
+                 Content="Disconnect" Command="{Binding DisconnectCommand}"
                  VerticalAlignment="Center" Width="80"
                  IsEnabled="{Binding ChatEnabled}"/>
-         <Separator/>
          <Button x:Name="btRefresh"
-                 Content="Refresh" Click="btRefresh_Click"
+                 Content="Refresh" Command="{Binding RefreshCommand}"
                  VerticalAlignment="Center" Width="80"/>
       </ToolBar>
 
@@ -58,7 +65,7 @@
                   Grid.Column="0"/>
          <Button x:Name="btSend"
                  Content="Send ->"
-                 Click="btSend_Click"
+                 Command="{Binding SendCommand}"
                  VerticalAlignment="Top"
                  IsEnabled="{Binding ChatEnabled, Mode=TwoWay}"
                  Grid.Column="1"/>

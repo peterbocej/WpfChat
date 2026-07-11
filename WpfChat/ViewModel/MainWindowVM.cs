@@ -2,7 +2,11 @@
 using System.Windows;
 using System.Windows.Input;
 
+using CommunityToolkit.Mvvm.Input;
+
 using Microsoft.Extensions.Configuration;
+
+using Org.BouncyCastle.Math.Field;
 
 using Serilog;
 
@@ -14,7 +18,7 @@ namespace WpfChat.ViewModel;
 
 public interface IMainViewModel : IBaseViewModel
 { }
-public class MainWindowVM : BaseViewModel, IMainViewModel
+public partial class MainWindowVM : BaseViewModel, IMainViewModel
 {
     private readonly IApiService _apiService;
     private readonly IConfiguration _configuration;
@@ -26,6 +30,98 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
         _configuration = App.GetRequiredService<IConfiguration>();
         UserName = Properties.Settings.Default.UserName;
     }
+
+    #region Commands
+
+    [RelayCommand]
+    private async Task ConnectAsync()
+    {
+        try
+        {
+            Cursor = Cursors.Wait;
+            await _apiService.ConnectAsync(UserName);
+            await GetSavedMessages();
+            ChatEnabled = true;
+            SetTitle();
+            await StartTimerAsync();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            Log.Error(ex.Message);
+        }
+        finally
+        {
+            Cursor = Cursors.Arrow;
+        }
+    }
+    [RelayCommand]
+    public async Task DisconnectAsync()
+    {
+        try
+        {
+            Cursor = Cursors.Wait;
+            await _apiService.DisconnectAsync(UserName);
+            await ReceiveMessages();
+            ChatEnabled = false;
+            StopTimer();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            Log.Error(ex.Message);
+        }
+        finally
+        {
+            Cursor = Cursors.Arrow;
+        }
+    }
+    [RelayCommand]
+    private async Task SendAsync()
+    {
+        if (string.IsNullOrWhiteSpace(MessageText))
+            return;
+        var message = new Message
+        {
+            From = UserName,
+            Body = MessageText
+        };
+        // send to server
+        await _apiService.SendMessageAsync(message);
+        await ReceiveMessages();
+        // clear
+        MessageText = string.Empty;
+    }
+    [RelayCommand]
+    private async Task RefreshAsync()
+    {
+        try
+        {
+            Cursor = Cursors.Wait;
+            await GetSavedMessages();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            Log.Error(ex.Message);
+        }
+        finally
+        {
+            Cursor = Cursors.Arrow;
+        }
+    }
+    [RelayCommand]
+    private async Task ClosedAsync()
+    {
+        Dispose();
+    }
+    [RelayCommand]
+    private async Task LoadedAsync()
+    {
+        // do something
+    }
+    #endregion
+
     #region Properties
 
     private string _title = "Chat";
@@ -154,79 +250,24 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
         }
         catch (Exception ex)
         {
-            MessageBox.Show(Window, ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
     public override void Dispose()
     {
         base.Dispose();
+        Properties.Settings.Default.Save();
         if (_cancellationTokenSource != null)
             _cancellationTokenSource.Cancel();
         _apiService.Dispose();
+        if (ChatEnabled)
+            DisconnectAsync().GetAwaiter().GetResult();
     }
 
     #endregion
 
     #region Chat
-    internal async Task Connect()
-    {
-        try
-        {
-            Cursor = Cursors.Wait;
-            await _apiService.ConnectAsync(UserName);
-            await GetSavedMessages();
-            ChatEnabled = true;
-            SetTitle();
-            await StartTimerAsync();
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show(Window, ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            Log.Error(ex.Message);
-        }
-        finally
-        {
-            Cursor = Cursors.Arrow;
-        }
-    }
-    internal async Task Disconnect()
-    {
-        try
-        {
-            Cursor = Cursors.Wait;
-            await _apiService.DisconnectAsync(UserName);
-            await ReceiveMessages();
-            ChatEnabled = false;
-            StopTimer();
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show(Window, ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            Log.Error(ex.Message);
-        }
-        finally
-        {
-            Cursor = Cursors.Arrow;
-        }
-    }
-    // sends new message
-    internal async Task SendMessage()
-    {
-        if (string.IsNullOrWhiteSpace(MessageText))
-            return;
-        var message = new Message
-        {
-            From = UserName,
-            Body = MessageText
-        };
-        // send to server
-        await _apiService.SendMessageAsync(message);
-        await ReceiveMessages();
-        // clear
-        MessageText = string.Empty;
-    }
-    // receive message
     internal async Task ReceiveMessages()
     {
         try
@@ -238,7 +279,7 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
         }
         catch (Exception ex)
         {
-            MessageBox.Show(Window, ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
         finally
         { 
@@ -256,25 +297,7 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
         }
         catch (Exception ex)
         {
-            MessageBox.Show(Window, ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            Log.Error(ex.Message);
-        }
-        finally
-        {
-            Cursor = Cursors.Arrow;
-        }
-    }
-
-    internal async Task Refresh()
-    {
-        try
-        {
-            Cursor = Cursors.Wait;
-            await GetSavedMessages();
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show(Window, ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             Log.Error(ex.Message);
         }
         finally

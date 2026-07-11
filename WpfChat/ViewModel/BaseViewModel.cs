@@ -1,18 +1,14 @@
 ﻿using System.ComponentModel;
 using System.Windows;
 
+using CommunityToolkit.Mvvm.ComponentModel;
+
 namespace WpfChat.ViewModel;
 
-public interface IBaseViewModel : IDisposable, INotifyPropertyChanged
+public interface IBaseViewModel : IDisposable
 { }
-public class BaseViewModel : IBaseViewModel
+public class BaseViewModel : ObservableObject, IBaseViewModel
 {
-    public event PropertyChangedEventHandler? PropertyChanged;
-    protected virtual void OnPropertyChanged(string propertyName)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
-
     private Window _window = default!;
     protected virtual Window Window
     {
