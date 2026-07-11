@@ -67,10 +67,7 @@ public class ApiService : IApiService
     {
         var json = JsonSerializer.Serialize(username);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
-        var url = "http://localhost:7077/chat/connect";
-        _logger.LogInformation("json: {0}; baseUrl: {1}; url: {2}", json, _httpClient.BaseAddress, url);
-        using var response = await _httpClient.PostAsync(url, content);
-        _logger.LogInformation($"Connected: {response.StatusCode}");
+        using var response = await _httpClient.PostAsync($"{_chatSettings.Path}/connect", content);
         if (!response.IsSuccessStatusCode)
             throw new ApplicationException("Error connecting to chat.");
     }

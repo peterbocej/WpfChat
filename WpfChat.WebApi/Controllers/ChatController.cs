@@ -68,11 +68,11 @@ public class ChatController : ControllerBase
     }
 
     [HttpGet("list")]
-    public async Task<IActionResult> GetSavedMessages()
+    public async Task<IActionResult> List()
     {
         try
         {
-            _logger.LogInformation(nameof(GetSavedMessages));
+            _logger.LogInformation(nameof(List));
             return Ok(await _messagesRepository.GetMessagesAsync());
         }
         catch (Exception ex)
@@ -99,7 +99,7 @@ public class ChatController : ControllerBase
         }
     }
     [HttpPost("send")]
-    public async Task<IActionResult> SendMessage([FromBody] Message message)
+    public async Task<IActionResult> Send([FromBody] Message message)
     {
         try
         {
@@ -116,11 +116,11 @@ public class ChatController : ControllerBase
         }
     }
     [HttpGet("check/{lastId:int}")]
-    public async Task<IActionResult> GetLastMessages(int lastId)
+    public async Task<IActionResult> Check(int lastId)
     {
         try
         {
-            _logger.LogInformation($"Get lat: {lastId}");
+            _logger.LogInformation($"Get last: {lastId}");
             return Ok(await _messagesRepository.GetLastMessagesAsync(lastId));
         }
         catch (Exception ex)

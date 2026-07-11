@@ -2,9 +2,12 @@
 using System.Windows;
 using System.Windows.Input;
 
+using Microsoft.Extensions.Configuration;
+
 using Serilog;
 
 using WpfChat.Domain.Model;
+using WpfChat.Domain.Settings;
 using WpfChat.Services;
 
 namespace WpfChat.ViewModel;
@@ -14,12 +17,14 @@ public interface IMainViewModel : IBaseViewModel
 public class MainWindowVM : BaseViewModel, IMainViewModel
 {
     private readonly IApiService _apiService;
+    private readonly IConfiguration _configuration;
+    private CancellationTokenSource? _cancellationTokenSource;
 
     public MainWindowVM()
     {
         _apiService = App.GetRequiredService<IApiService>();
+        _configuration = App.GetRequiredService<IConfiguration>();
         UserName = Properties.Settings.Default.UserName;
-
     }
     #region Properties
 
@@ -77,6 +82,7 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
         {
             _chatEnabled = value;
             OnPropertyChanged(nameof(ChatEnabled));
+            OnPropertyChanged(nameof(ChatDisabled));
         }
     }
     public bool ChatDisabled { get => !ChatEnabled; }
@@ -94,6 +100,29 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
     #endregion
 
     #region Functions
+
+    private async Task StartTimerAsync()
+    {
+        _cancellationTokenSource = new CancellationTokenSource();
+        var chatSettings = new ChatSettings();
+        _configuration.GetSection("Chat").Bind(chatSettings);
+        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(chatSettings.RefreshIntervalSec));
+        try
+        {
+            while (await timer.WaitForNextTickAsync(_cancellationTokenSource.Token))
+            {
+                await ReceiveMessages();
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // end timer
+        }
+    }
+    private void StopTimer()
+    {
+        _cancellationTokenSource?.Cancel();
+    }
     private void SetTitle()
     {
         var connected = ChatEnabled ? "Online" : "Offline";
@@ -132,6 +161,8 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
     public override void Dispose()
     {
         base.Dispose();
+        if (_cancellationTokenSource != null)
+            _cancellationTokenSource.Cancel();
         _apiService.Dispose();
     }
 
@@ -147,6 +178,7 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
             await GetSavedMessages();
             ChatEnabled = true;
             SetTitle();
+            await StartTimerAsync();
         }
         catch (Exception ex)
         {
@@ -166,6 +198,7 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
             await _apiService.DisconnectAsync(UserName);
             await ReceiveMessages();
             ChatEnabled = false;
+            StopTimer();
         }
         catch (Exception ex)
         {
@@ -198,8 +231,8 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
     {
         try
         {
-            Cursor = Cursors.Wait;
-            var messages = await _apiService.CheckNewMessagesAsync(Messages.Last().MessageId);
+            Cursor = Cursors.AppStarting;
+            var messages = await _apiService.CheckNewMessagesAsync(Messages.Max(m => m.MessageId));
             foreach (var message in messages)
                 ReceiveMessage(message);
         }
@@ -207,11 +240,16 @@ public class MainWindowVM : BaseViewModel, IMainViewModel
         {
             MessageBox.Show(Window, ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
+        finally
+        { 
+            Cursor = Cursors.Arrow; 
+        }
     }
     private void ReceiveMessage(Message message)
     {
         try
         {
+            message.Me = (byte)(message.From == UserName ? 1 : 0);
             // add to grid
             Messages!.Insert(0, message);
             SelectedIndex = 0;
