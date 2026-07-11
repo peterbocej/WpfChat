@@ -261,8 +261,6 @@ public partial class MainWindowVM : BaseViewModel, IMainViewModel
         if (_cancellationTokenSource != null)
             _cancellationTokenSource.Cancel();
         _apiService.Dispose();
-        if (ChatEnabled)
-            DisconnectAsync().GetAwaiter().GetResult();
     }
 
     #endregion
