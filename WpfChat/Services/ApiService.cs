@@ -15,7 +15,9 @@ public interface IApiService : IDisposable
     Task SendMessageAsync(Message message);
     Task<IList<Message>> CheckNewMessagesAsync(int lastId);
     ChatSettings ChatSettings { get; }
+    ApiState State { get; }
 }
+
 public abstract class ApiService : IApiService
 {
     protected readonly ILogger _logger;
@@ -32,5 +34,12 @@ public abstract class ApiService : IApiService
     public abstract Task SendMessageAsync(Message message);
     public abstract Task<IList<Message>> CheckNewMessagesAsync(int lastId);
     public virtual ChatSettings ChatSettings { get; }
+    public virtual ApiState State { get; protected set; } = ApiState.Disconnected;
     public abstract void Dispose();
+}
+
+public enum ApiState
+{
+    Connected = 1,
+    Disconnected = 2,
 }

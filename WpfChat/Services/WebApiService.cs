@@ -55,6 +55,7 @@ public class WebApiService : ApiService, IWebApiService
         using var response = await _httpClient.PostAsync($"{ChatSettings.Path}/connect", content);
         if (!response.IsSuccessStatusCode)
             throw new ApplicationException("Error connecting to chat.");
+        State = ApiState.Connected;
     }
 
     public override async Task DisconnectAsync(string username)
@@ -64,6 +65,7 @@ public class WebApiService : ApiService, IWebApiService
         var response = await _httpClient.PostAsync($"{ChatSettings.Path}/disconnect", content);
         if (!response.IsSuccessStatusCode)
             throw new ApplicationException("Error connecting to chat.");
+        State = ApiState.Disconnected;
     }
 
     public override async Task SendMessageAsync(Message message)
@@ -83,7 +85,6 @@ public class WebApiService : ApiService, IWebApiService
         var messages = await response.Content.ReadFromJsonAsync<List<Message>>();
         return messages ?? new List<Message>();
     }
-
     public override void Dispose()
     {
         _httpClient.Dispose();

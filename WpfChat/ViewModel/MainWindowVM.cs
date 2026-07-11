@@ -36,6 +36,7 @@ public partial class MainWindowVM : BaseViewModel, IMainViewModel
         try
         {
             Cursor = Cursors.Wait;
+            StatusText = "Connecting...";
             await _apiService.ConnectAsync(UserName);
             await GetSavedMessages();
             ChatEnabled = true;
@@ -47,10 +48,8 @@ public partial class MainWindowVM : BaseViewModel, IMainViewModel
             MessageBox.Show(Window, ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             Log.Error(ex.Message);
         }
-        finally
-        {
-            Cursor = Cursors.Arrow;
-        }
+        Cursor = Cursors.Arrow;
+        StatusText = "Ready";
     }
     [RelayCommand]
     public async Task DisconnectAsync()
@@ -58,6 +57,7 @@ public partial class MainWindowVM : BaseViewModel, IMainViewModel
         try
         {
             Cursor = Cursors.Wait;
+            StatusText = "Disconnecting...";
             await _apiService.DisconnectAsync(UserName);
             await ReceiveMessages();
             ChatEnabled = false;
@@ -68,10 +68,8 @@ public partial class MainWindowVM : BaseViewModel, IMainViewModel
             MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             Log.Error(ex.Message);
         }
-        finally
-        {
-            Cursor = Cursors.Arrow;
-        }
+        Cursor = Cursors.Arrow;
+        StatusText = "Ready";
     }
     [RelayCommand]
     private async Task SendAsync()
@@ -83,12 +81,23 @@ public partial class MainWindowVM : BaseViewModel, IMainViewModel
             From = UserName,
             Body = MessageText
         };
-        // send to server
-        await _apiService.SendMessageAsync(message);
-        await ReceiveMessages();
-        // clear
-        MessageText = string.Empty;
-        MessageFocus = true;
+        try
+        {
+            StatusText = "Sending...";
+            // send to server
+            await _apiService.SendMessageAsync(message);
+            // clear
+            MessageText = string.Empty;
+            MessageFocus = true;
+            await ReceiveMessages();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            Log.Error(ex.Message);
+        }
+        Cursor = Cursors.Arrow;
+        StatusText = "Ready";
     }
     [RelayCommand]
     private async Task RefreshAsync()
@@ -96,6 +105,7 @@ public partial class MainWindowVM : BaseViewModel, IMainViewModel
         try
         {
             Cursor = Cursors.Wait;
+            StatusText = "Refreshing...";
             await GetSavedMessages();
         }
         catch (Exception ex)
@@ -103,10 +113,8 @@ public partial class MainWindowVM : BaseViewModel, IMainViewModel
             MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             Log.Error(ex.Message);
         }
-        finally
-        {
-            Cursor = Cursors.Arrow;
-        }
+        Cursor = Cursors.Arrow;
+        StatusText = "Ready";
     }
     [RelayCommand]
     private async Task ClosedAsync()
@@ -201,7 +209,6 @@ public partial class MainWindowVM : BaseViewModel, IMainViewModel
         }
     }
     private bool _messageFocus;
-
     public bool MessageFocus
     {
         get { return _messageFocus; }
@@ -212,6 +219,16 @@ public partial class MainWindowVM : BaseViewModel, IMainViewModel
         }
     }
 
+    private string _statusText = "Ready";
+    public string StatusText
+    {
+        get => _statusText;
+        set
+        {
+            _statusText = value;
+            OnPropertyChanged(nameof(StatusText));
+        }
+    }
 
     #endregion
 
@@ -272,23 +289,26 @@ public partial class MainWindowVM : BaseViewModel, IMainViewModel
         }
     }
 
-    public override void Dispose()
+    public override async void Dispose()
     {
         base.Dispose();
         Properties.Settings.Default.Save();
         if (_cancellationTokenSource != null)
             _cancellationTokenSource.Cancel();
+        if (_apiService.State == ApiState.Connected)
+            await _apiService.DisconnectAsync(UserName);
         _apiService.Dispose();
     }
 
     #endregion
 
     #region Chat
-    internal async Task ReceiveMessages()
+    private async Task ReceiveMessages()
     {
         try
         {
             Cursor = Cursors.AppStarting;
+            StatusText = "Communicating...";
             var messages = await _apiService.CheckNewMessagesAsync(Messages.Max(m => m.MessageId));
             foreach (var message in messages)
                 ReceiveMessage(message);
@@ -297,10 +317,8 @@ public partial class MainWindowVM : BaseViewModel, IMainViewModel
         {
             MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
-        finally
-        {
-            Cursor = Cursors.Arrow;
-        }
+        Cursor = Cursors.Arrow;
+        StatusText = "Ready";
     }
     private void ReceiveMessage(Message message)
     {
