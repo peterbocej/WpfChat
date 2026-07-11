@@ -21,11 +21,6 @@ builder.Services.AddScoped<IMessagesRepository, MessagesRepository>();
 var chatSettings = new ChatSettings();
 builder.Configuration.GetSection("Chat").Bind(chatSettings);
 
-builder.WebHost.ConfigureKestrel(o =>
-{
-    o.ListenAnyIP(7077);
-});
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

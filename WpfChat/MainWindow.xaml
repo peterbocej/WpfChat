@@ -5,6 +5,7 @@
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfChat"
+        xmlns:helper="clr-namespace:WpfChat.Helpers"
         mc:Ignorable="d"
         xmlns:vm="clr-namespace:WpfChat.ViewModel"
         Title="{Binding Title}" 
@@ -35,7 +36,8 @@
          <TextBox x:Name="tbUser" 
                   Text="{Binding UserName, Mode=TwoWay}" 
                   VerticalAlignment="Center" Width="80"
-                  IsEnabled="{Binding ChatDisabled}"/>
+                  IsEnabled="{Binding ChatDisabled}"
+                  helper:FocusHelper.IsFocused="{Binding UserNameFocus, Mode=TwoWay}"/>
          <Separator/>
          <Button x:Name="btConnect" 
                  Content="Connect" Command="{Binding ConnectCommand}"

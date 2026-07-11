@@ -91,6 +91,7 @@ public partial class MainWindowVM : BaseViewModel, IMainViewModel
         await ReceiveMessages();
         // clear
         MessageText = string.Empty;
+        MessageFocus = true;
     }
     [RelayCommand]
     private async Task RefreshAsync()
@@ -118,7 +119,7 @@ public partial class MainWindowVM : BaseViewModel, IMainViewModel
     [RelayCommand]
     private async Task LoadedAsync()
     {
-        // do something
+        UserNameFocus = true;
     }
     #endregion
 
@@ -192,6 +193,28 @@ public partial class MainWindowVM : BaseViewModel, IMainViewModel
             OnPropertyChanged(nameof(Cursor));
         }
     }
+    private bool _userNameFocus;
+    public bool UserNameFocus
+    {
+        get { return _userNameFocus; }
+        set 
+        { 
+            _userNameFocus = value; 
+            OnPropertyChanged(nameof(UserNameFocus));
+        }
+    }
+    private bool _messageFocus;
+
+    public bool MessageFocus
+    {
+        get { return _messageFocus; }
+        set 
+        { 
+            _messageFocus = value; 
+            OnPropertyChanged(nameof(MessageFocus));
+        }
+    }
+
 
     #endregion
 
