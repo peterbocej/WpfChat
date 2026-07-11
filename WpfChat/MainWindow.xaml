@@ -5,7 +5,8 @@
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfChat"
-        xmlns:helper="clr-namespace:WpfChat.Helpers"
+        xmlns:h="clr-namespace:WpfChat.Helpers"
+        xmlns:b="clr-namespace:WpfChat.Behaviors"
         mc:Ignorable="d"
         xmlns:vm="clr-namespace:WpfChat.ViewModel"
         Title="{Binding Title}" 
@@ -37,7 +38,8 @@
                   Text="{Binding UserName, Mode=TwoWay}" 
                   VerticalAlignment="Center" Width="80"
                   IsEnabled="{Binding ChatDisabled}"
-                  helper:FocusHelper.IsFocused="{Binding UserNameFocus, Mode=TwoWay}"/>
+                  h:FocusHelper.IsFocused="{Binding UserNameFocus, Mode=TwoWay}"
+                  b:TextBoxBehavior.SelectAllOnFocus="True"/>
          <Separator/>
          <Button x:Name="btConnect" 
                  Content="Connect" Command="{Binding ConnectCommand}"
@@ -64,6 +66,7 @@
                   VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
                   Text="{Binding MessageText, Mode=TwoWay}"
                   IsEnabled="{Binding ChatEnabled, Mode=TwoWay}"
+                  h:FocusHelper.IsFocused="{Binding MessageFocus, Mode=TwoWay}"
                   Grid.Column="0"/>
          <Button x:Name="btSend"
                  Content="Send ->"
