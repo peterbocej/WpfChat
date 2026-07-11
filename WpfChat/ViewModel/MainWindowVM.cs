@@ -24,7 +24,7 @@ public partial class MainWindowVM : BaseViewModel, IMainViewModel
 
     public MainWindowVM()
     {
-        _apiService = App.GetRequiredService<IApiService>();
+        _apiService = App.GetRequiredService<IWebApiService>();
         _configuration = App.GetRequiredService<IConfiguration>();
         UserName = Properties.Settings.Default.UserName;
     }
@@ -221,9 +221,7 @@ public partial class MainWindowVM : BaseViewModel, IMainViewModel
     private async Task StartTimerAsync()
     {
         _cancellationTokenSource = new CancellationTokenSource();
-        var chatSettings = new ChatSettings();
-        _configuration.GetSection("Chat").Bind(chatSettings);
-        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(chatSettings.RefreshIntervalSec));
+        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(_apiService.ChatSettings.RefreshIntervalSec));
         try
         {
             while (await timer.WaitForNextTickAsync(_cancellationTokenSource.Token))

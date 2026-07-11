@@ -17,7 +17,7 @@ public class Program
             .AddJsonFile("appsettings.json")
             .Build();
         services.AddSingleton<IConfiguration>(configuration);
-        services.AddSingleton<IApiService, ApiService>();
+        services.AddSingleton<IWebApiService, WebApiService>();
 
         App.ServiceProvider = services.BuildServiceProvider();
 
