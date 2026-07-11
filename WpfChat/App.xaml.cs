@@ -2,6 +2,8 @@
 
 using Microsoft.Extensions.DependencyInjection;
 
+using WpfChat.Services;
+
 namespace WpfChat
 {
     /// <summary>
@@ -13,6 +15,10 @@ namespace WpfChat
         public static T GetRequiredService<T>() where T : class
         {
             return ServiceProvider.GetRequiredService<T>();
+        }
+        public static IApiService? GetApiService(Type serviceType)
+        {
+            return ServiceProvider.GetService(serviceType) as IApiService;
         }
     }
 }

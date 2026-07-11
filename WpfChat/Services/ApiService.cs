@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 using WpfChat.Domain.Model;
@@ -22,14 +18,11 @@ public interface IApiService : IDisposable
 }
 public abstract class ApiService : IApiService
 {
-    protected readonly IConfiguration _configuration;
     protected readonly ILogger _logger;
-    public ApiService(IConfiguration configuration, ILogger logger, string chatConfigSection)
+    public ApiService(ChatSettings chatSettings, ILogger logger)
     {
-        _configuration = configuration;
+        ChatSettings = chatSettings;
         _logger = logger;
-        ChatSettings = new ChatSettings();
-        _configuration.GetSection(chatConfigSection).Bind(ChatSettings);
     }
 
     public abstract Task<Message?> GetMessageByIdAsync(int id);

@@ -4,8 +4,6 @@ using System.Windows.Input;
 
 using CommunityToolkit.Mvvm.Input;
 
-using Microsoft.Extensions.Configuration;
-
 using Serilog;
 
 using WpfChat.Domain.Model;
@@ -19,13 +17,14 @@ public interface IMainViewModel : IBaseViewModel
 public partial class MainWindowVM : BaseViewModel, IMainViewModel
 {
     private readonly IApiService _apiService;
-    private readonly IConfiguration _configuration;
+    private readonly ChatSettings _chatSettings;
     private CancellationTokenSource? _cancellationTokenSource;
 
     public MainWindowVM()
     {
-        _apiService = App.GetRequiredService<IWebApiService>();
-        _configuration = App.GetRequiredService<IConfiguration>();
+        _chatSettings = App.GetRequiredService<ChatSettings>();
+        _apiService = App.GetApiService(_chatSettings.ApiServiceType)
+            ?? throw new ApplicationException("Api service not fount");
         UserName = Properties.Settings.Default.UserName;
     }
 

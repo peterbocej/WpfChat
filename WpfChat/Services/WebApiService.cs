@@ -17,8 +17,8 @@ public class WebApiService : ApiService, IWebApiService
 {
     private readonly HttpClient _httpClient;
 
-    public WebApiService(IConfiguration configuration, ILogger<WebApiService> logger)
-        : base(configuration, logger, "WebChat")
+    public WebApiService(ChatSettings chatSettings, ILogger<WebApiService> logger)
+        : base(chatSettings, logger)
     {
         _httpClient = new HttpClient
         {
