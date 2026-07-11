@@ -1,7 +1,5 @@
 ﻿using System.Windows;
 
-using WpfChat.ViewModel;
-
 namespace WpfChat;
 
 /// <summary>

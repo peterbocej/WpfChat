@@ -6,8 +6,6 @@ using CommunityToolkit.Mvvm.Input;
 
 using Microsoft.Extensions.Configuration;
 
-using Org.BouncyCastle.Math.Field;
-
 using Serilog;
 
 using WpfChat.Domain.Model;
@@ -47,7 +45,7 @@ public partial class MainWindowVM : BaseViewModel, IMainViewModel
         }
         catch (Exception ex)
         {
-            MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(Window, ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             Log.Error(ex.Message);
         }
         finally
@@ -197,9 +195,9 @@ public partial class MainWindowVM : BaseViewModel, IMainViewModel
     public bool UserNameFocus
     {
         get { return _userNameFocus; }
-        set 
-        { 
-            _userNameFocus = value; 
+        set
+        {
+            _userNameFocus = value;
             OnPropertyChanged(nameof(UserNameFocus));
         }
     }
@@ -208,9 +206,9 @@ public partial class MainWindowVM : BaseViewModel, IMainViewModel
     public bool MessageFocus
     {
         get { return _messageFocus; }
-        set 
-        { 
-            _messageFocus = value; 
+        set
+        {
+            _messageFocus = value;
             OnPropertyChanged(nameof(MessageFocus));
         }
     }
@@ -303,8 +301,8 @@ public partial class MainWindowVM : BaseViewModel, IMainViewModel
             MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
         finally
-        { 
-            Cursor = Cursors.Arrow; 
+        {
+            Cursor = Cursors.Arrow;
         }
     }
     private void ReceiveMessage(Message message)
